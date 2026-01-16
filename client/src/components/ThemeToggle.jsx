@@ -1,42 +1,51 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FiSun, FiMoon } from 'react-icons/fi';
 import { useTheme } from '../contexts/ThemeContext';
 
-const ThemeToggle = () => {
+const ThemeToggle = ({ variant = 'circle', showLabel = false }) => {
   const { theme, toggleTheme } = useTheme();
+
+  const isCircle = variant === 'circle';
 
   return (
     <motion.button
       onClick={toggleTheme}
-      className="relative w-14 h-14 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-      whileHover={{ scale: 1.05 }}
+      className={`relative ${
+        isCircle 
+          ? 'w-14 h-14 rounded-full' 
+          : 'w-full px-4 py-3 rounded-xl'
+      } bg-gray-200 dark:bg-gray-700 flex items-center ${
+        isCircle ? 'justify-center' : 'gap-3'
+      } hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors`}
+      whileHover={{ scale: isCircle ? 1.05 : 1.02, x: !isCircle ? 5 : 0 }}
       whileTap={{ scale: 0.95 }}
       aria-label="Toggle theme"
     >
       <motion.div
-        initial={false}
         animate={{
-          scale: theme === 'dark' ? 1 : 0,
-          opacity: theme === 'dark' ? 1 : 0,
-          rotate: theme === 'dark' ? 0 : 180,
+          rotate: theme === 'dark' ? 180 : 0,
         }}
-        transition={{ duration: 0.3 }}
-        className="absolute"
+        transition={{ duration: 0.5 }}
+        className="flex-shrink-0"
       >
-        <FiMoon className="w-5 h-5 text-yellow-400" />
+        {theme === 'dark' ? (
+          <FiMoon className="w-5 h-5 text-blue-400" />
+        ) : (
+          <FiSun className="w-5 h-5 text-orange-500" />
+        )}
       </motion.div>
-      <motion.div
-        initial={false}
-        animate={{
-          scale: theme === 'light' ? 1 : 0,
-          opacity: theme === 'light' ? 1 : 0,
-          rotate: theme === 'light' ? 0 : -180,
-        }}
-        transition={{ duration: 0.3 }}
-        className="absolute"
-      >
-        <FiSun className="w-5 h-5 text-yellow-500" />
-      </motion.div>
+      <AnimatePresence>
+        {showLabel && !isCircle && (
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="font-medium flex-1 text-left text-gray-700 dark:text-gray-300"
+          >
+            {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+          </motion.span>
+        )}
+      </AnimatePresence>
     </motion.button>
   );
 };

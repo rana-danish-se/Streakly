@@ -5,7 +5,8 @@ import dotenv from 'dotenv';
 import { verifyCloudinaryConfig } from './config/cloudinary.js';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
-import uploadRoutes from './routes/uploadRoutes.js';
+import journeyRoutes from './routes/journeyRoutes.js';
+import taskRoutes from './routes/taskRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -29,9 +30,17 @@ connectDB();
 // Verify Cloudinary configuration
 verifyCloudinaryConfig();
 
-// API Routes
+
+
+
+// Mount routes
 app.use('/api/auth', authRoutes);
-app.use('/api/upload', uploadRoutes);
+app.use('/api/journeys', journeyRoutes);
+app.use('/api/journeys/:journeyId/tasks', taskRoutes); // Nested task routes
+app.use('/api/tasks', taskRoutes); // Top-level task routes
+
+
+
 
 // Root route
 app.get('/', (req, res) => {

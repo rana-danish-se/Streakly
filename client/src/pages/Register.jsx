@@ -101,7 +101,7 @@ const Register = () => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-100 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20 flex items-center justify-center p-6 relative overflow-hidden"
+      className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-100 dark:from-slate-950 dark:via-slate-900/20 dark:to-slate-950/20 flex items-center justify-center p-6 relative overflow-hidden"
     >
       {/* Theme Toggle */}
       <div className="absolute top-6 right-6 z-50">
@@ -110,22 +110,22 @@ const Register = () => {
 
       {/* Decorative blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-br from-blue-400/30 dark:from-blue-600/20 to-indigo-500/30 dark:to-indigo-600/20 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3" />
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-br from-blue-400/30 dark:from-teal-500/20 to-indigo-500/30 dark:to-emerald-500/20 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3" />
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-indigo-400/20 dark:from-indigo-600/10 to-purple-400/20 dark:to-purple-600/10 rounded-full blur-3xl transform -translate-x-1/4 translate-y-1/4" />
       </div>
 
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-0 relative z-10">
         {/* Left Side - Form */}
-        <div className="bg-white dark:bg-gray-800 rounded-l-[3rem] lg:rounded-r-none rounded-r-[3rem] p-10 relative shadow-2xl border border-gray-100 dark:border-gray-700">
+        <div className="bg-white dark:bg-slate-800 rounded-l-[3rem] lg:rounded-r-none rounded-r-[3rem] p-10 relative shadow-2xl border border-gray-100 dark:border-slate-700">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <Link to="/">
-              <button className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-colors text-gray-700 dark:text-gray-300">
+              <button className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-colors text-gray-700 dark:text-slate-300">
                 <FiArrowRight className="w-5 h-5 rotate-180 text-gray-900 dark:text-white" />
               </button>
             </Link>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Already member? <Link to="/login"><button className="text-blue-600 dark:text-blue-400 font-semibold hover:underline">Sign in</button></Link>
+            <div className="text-sm text-gray-600 dark:text-slate-400">
+              Already member? <Link to="/login"><button className="text-blue-600 dark:text-teal-400 font-semibold hover:underline">Sign in</button></Link>
             </div>
           </div>
 
@@ -135,12 +135,12 @@ const Register = () => {
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Sign Up</h1>
           </div>
           <div className="max-w-md">
-            <p className="text-gray-500 dark:text-gray-400 mb-2">Start tracking your learning journey today</p>
+            <p className="text-gray-500 dark:text-slate-400 mb-2">Start tracking your learning journey today</p>
 
             <div className="space-y-3">
               {/* Name Input */}
               <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500">
                   <FiUser className="w-5 h-5" />
                 </div>
                 <input
@@ -149,7 +149,7 @@ const Register = () => {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Your full name"
-                  className="w-full pl-12 pr-12 py-4 bg-white dark:bg-gray-900/50 border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  className="w-full pl-12 pr-12 py-4 bg-white dark:bg-slate-900/50 border-2 border-gray-200 dark:border-slate-600 rounded-2xl focus:border-blue-500 dark:focus:border-teal-500 focus:outline-none text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500"
                 />
                 {formData.name && (
                   <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -162,7 +162,7 @@ const Register = () => {
 
               {/* Email Input */}
               <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500">
                   <FiMail className="w-5 h-5" />
                 </div>
                 <input
@@ -171,7 +171,7 @@ const Register = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="your@email.com"
-                  className="w-full pl-12 pr-12 py-4 bg-white dark:bg-gray-900/50 border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  className="w-full pl-12 pr-12 py-4 bg-white dark:bg-slate-900/50 border-2 border-gray-200 dark:border-slate-600 rounded-2xl focus:border-blue-500 dark:focus:border-teal-500 focus:outline-none text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500"
                 />
                 {formData.email && formData.email.includes('@') && (
                   <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -184,7 +184,7 @@ const Register = () => {
 
               {/* Password Input */}
               <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500">
                   <FiLock className="w-5 h-5" />
                 </div>
                 <input
@@ -193,12 +193,12 @@ const Register = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="Create password"
-                  className="w-full pl-12 pr-12 py-4 bg-white dark:bg-gray-900/50 border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  className="w-full pl-12 pr-12 py-4 bg-white dark:bg-slate-900/50 border-2 border-gray-200 dark:border-slate-600 rounded-2xl focus:border-blue-500 dark:focus:border-teal-500 focus:outline-none text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   {showPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
                 </button>
@@ -212,9 +212,9 @@ const Register = () => {
                       {req.met ? (
                         <FiCheck className="w-4 h-4 text-green-500 flex-shrink-0" />
                       ) : (
-                        <div className="w-4 h-4 rounded-full border-2 border-gray-300 dark:border-gray-600 flex-shrink-0" />
+                        <div className="w-4 h-4 rounded-full border-2 border-gray-300 dark:border-slate-600 flex-shrink-0" />
                       )}
-                      <span className={req.met ? 'text-green-500' : 'text-gray-400 dark:text-gray-500'}>
+                      <span className={req.met ? 'text-green-500' : 'text-gray-400 dark:text-slate-500'}>
                         {req.text}
                       </span>
                     </div>
@@ -224,7 +224,7 @@ const Register = () => {
 
               {/* Confirm Password Input */}
               <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500">
                   <FiLock className="w-5 h-5" />
                 </div>
                 <input
@@ -233,12 +233,12 @@ const Register = () => {
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   placeholder="Re-type password"
-                  className="w-full pl-12 pr-12 py-4 bg-white dark:bg-gray-900/50 border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  className="w-full pl-12 pr-12 py-4 bg-white dark:bg-slate-900/50 border-2 border-gray-200 dark:border-slate-600 rounded-2xl focus:border-blue-500 dark:focus:border-teal-500 focus:outline-none text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-gray-500"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   {showConfirmPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
                 </button>
@@ -260,9 +260,9 @@ const Register = () => {
                     </>
                   )}
                 </button>
-                <span className="text-gray-400 dark:text-gray-500 font-medium">Or</span>
+                <span className="text-gray-400 dark:text-slate-500 font-medium">Or</span>
                 <button className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-xl flex items-center justify-center transition-colors">
-                  <SiFacebook className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <SiFacebook className="w-5 h-5 text-blue-600 dark:text-teal-400" />
                 </button>
                 <button className="w-12 h-12 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-xl flex items-center justify-center transition-colors">
                   <SiGoogle className="w-5 h-5 text-red-500 dark:text-red-400" />
@@ -285,7 +285,7 @@ const Register = () => {
           {/* Floating cards */}
           <div className="relative z-10 h-full flex flex-col justify-center space-y-6">
             {/* Stats Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl transform hover:scale-105 transition-transform duration-300 animate-float" style={{ animationDelay: '0s' }}>
+            <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-xl transform hover:scale-105 transition-transform duration-300 animate-float" style={{ animationDelay: '0s' }}>
               <div className="text-sm text-orange-500 dark:text-orange-400 font-semibold mb-2">Learning Streaks</div>
               <div className="text-4xl font-bold text-gray-900 dark:text-white mb-4">176 days</div>
               <div className="flex items-center gap-2">
@@ -313,16 +313,16 @@ const Register = () => {
 
             {/* Social Icons */}
             <div className="flex justify-end gap-4">
-              <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-full shadow-xl flex items-center justify-center hover:scale-110 transition-transform animate-float" style={{ animationDelay: '0.2s' }}>
+              <div className="w-16 h-16 bg-white dark:bg-slate-800 rounded-full shadow-xl flex items-center justify-center hover:scale-110 transition-transform animate-float" style={{ animationDelay: '0.2s' }}>
                 <FiInstagram className="w-7 h-7 text-pink-500" />
               </div>
-              <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-full shadow-xl flex items-center justify-center hover:scale-110 transition-transform animate-float" style={{ animationDelay: '0.4s' }}>
+              <div className="w-16 h-16 bg-white dark:bg-slate-800 rounded-full shadow-xl flex items-center justify-center hover:scale-110 transition-transform animate-float" style={{ animationDelay: '0.4s' }}>
                 <SiTiktok className="w-6 h-6 text-gray-900 dark:text-white" />
               </div>
             </div>
 
             {/* Privacy Card */}
-            <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl transform hover:scale-105 transition-transform duration-300 animate-float" style={{ animationDelay: '0.6s' }}>
+            <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-xl transform hover:scale-105 transition-transform duration-300 animate-float" style={{ animationDelay: '0.6s' }}>
               <div className="flex items-start gap-4">
                 <div className="flex-1">
                   <div className="space-y-2 mb-4">
@@ -337,7 +337,7 @@ const Register = () => {
                 </div>
               </div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Your data, your rules</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Your learning progress is private and secure</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400">Your learning progress is private and secure</p>
             </div>
           </div>
 

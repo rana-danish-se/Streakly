@@ -55,14 +55,14 @@ const LandingPage = () => {
   return (
     <>
       {/* Hero Section */}
-      <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-100 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20">
+      <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
         {/* Header Buttons */}
         <div className="absolute top-6 right-6 z-50 flex items-center gap-3">
           <Link to="/login">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700"
+              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-50 font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-slate-700"
             >
               <FiLogIn className="w-4 h-4" />
               <span>Login</span>
@@ -74,17 +74,17 @@ const LandingPage = () => {
         {/* Background Decorations */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
-            className="absolute top-20 left-10 w-72 h-72 bg-indigo-300/30 dark:bg-blue-600/10 rounded-full blur-3xl"
+            className="absolute top-20 left-10 w-72 h-72 bg-indigo-300/30 dark:bg-teal-500/10 rounded-full blur-3xl"
             animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.6, 0.4] }}
             transition={{ duration: 8, repeat: Infinity }}
           />
           <motion.div
-            className="absolute bottom-20 right-20 w-96 h-96 bg-violet-300/30 dark:bg-purple-600/10 rounded-full blur-3xl"
+            className="absolute bottom-20 right-20 w-96 h-96 bg-violet-300/30 dark:bg-emerald-500/10 rounded-full blur-3xl"
             animate={{ scale: [1.2, 1, 1.2], opacity: [0.4, 0.6, 0.4] }}
             transition={{ duration: 10, repeat: Infinity }}
           />
           <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-200/20 dark:bg-indigo-600/5 rounded-full blur-3xl"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-200/20 dark:bg-cyan-500/5 rounded-full blur-3xl"
             animate={{ rotate: 360 }}
             transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
           />
@@ -103,7 +103,7 @@ const LandingPage = () => {
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-lg">
                 <div className="flex items-center gap-3">
                   <img src={logo} alt="Streakly Logo" className="h-10 w-auto" />
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-teal-400 dark:to-emerald-400 bg-clip-text text-transparent">
                     Streakly
                   </h1>
                 </div>
@@ -115,11 +115,11 @@ const LandingPage = () => {
               variants={itemVariants}
               className="text-5xl md:text-7xl font-bold mb-6 leading-tight"
             >
-              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-teal-400 dark:via-emerald-400 dark:to-cyan-400 bg-clip-text text-transparent">
                 Master Your Goals
               </span>
               <br />
-              <span className="text-gray-900 dark:text-white">
+              <span className="text-gray-900 dark:text-slate-50">
                 One Streak at a Time
               </span>
             </motion.h1>
@@ -127,10 +127,10 @@ const LandingPage = () => {
             {/* Subheading */}
             <motion.p
               variants={itemVariants}
-              className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed"
+              className="text-xl md:text-2xl text-gray-600 dark:text-slate-300 mb-12 max-w-3xl mx-auto leading-relaxed"
             >
               Transform your learning habits with{' '}
-              <span className="font-semibold text-indigo-600 dark:text-indigo-400">Streakly</span>.
+              <span className="font-semibold text-indigo-600 dark:text-teal-400">Streakly</span>.
               Track topics, build consistency, and watch your progress soar with powerful
               streak tracking and beautiful insights.
             </motion.p>
@@ -160,7 +160,7 @@ const LandingPage = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-200 dark:border-gray-700"
+                  className="px-8 py-4 bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-50 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-200 dark:border-slate-700"
                 >
                   Learn More
                 </motion.button>
@@ -183,7 +183,7 @@ const LandingPage = () => {
                   className={`flex items-center gap-2 px-5 py-3 rounded-full bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition-all border border-${feature.color}-200 dark:border-${feature.color}-800/50`}
                 >
                   <feature.icon className={`w-5 h-5 text-${feature.color}-600 dark:text-${feature.color}-400`} />
-                  <span className="font-medium text-gray-700 dark:text-gray-300">
+                  <span className="font-medium text-gray-700 dark:text-slate-300">
                     {feature.text}
                   </span>
                 </motion.div>
@@ -205,12 +205,12 @@ const LandingPage = () => {
                   variants={floatingVariants}
                   animate="float"
                   transition={{ delay: index * 0.2 }}
-                  className="p-6 rounded-2xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-lg"
+                  className="p-6 rounded-2xl bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-gray-200 dark:border-slate-700 shadow-lg"
                 >
-                  <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent mb-2">
+                  <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-teal-400 dark:to-emerald-400 bg-clip-text text-transparent mb-2">
                     {stat.number}
                   </div>
-                  <div className="text-gray-600 dark:text-gray-400 font-medium">
+                  <div className="text-gray-600 dark:text-slate-400 font-medium">
                     {stat.label}
                   </div>
                 </motion.div>
