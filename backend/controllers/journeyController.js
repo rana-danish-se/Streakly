@@ -1,6 +1,7 @@
 import Journey from '../models/Journey.js';
 import Task from '../models/Task.js';
-import { updateJourneyStats } from '../utils/streakCalculator.js';
+import pushService from '../services/pushNotificationService.js';
+
 import { v2 as cloudinary } from 'cloudinary';
 
 /**
@@ -10,38 +11,35 @@ import { v2 as cloudinary } from 'cloudinary';
  */
 export const createJourney = async (req, res) => {
   try {
-    const { title, description, targetDays, tasks, startDate } = req.body;
-
-    // Create the journey
+    const { title, description, targetDays, startDate } = req.body;
+    
+    const parsedStartDate = startDate ? new Date(startDate) : new Date();
+    const now = new Date();
+    
+    // Determine initial status based on start date
+    const status = parsedStartDate > now ? 'pending' : 'active';
+    
     const journey = await Journey.create({
       user: req.user._id,
       title,
       description,
       targetDays: targetDays || 30,
-      startDate: startDate || Date.now()
+      startDate: parsedStartDate,
+      status
     });
 
-    // If tasks array is provided, create initial tasks
-    let createdTasks = [];
-    if (tasks && Array.isArray(tasks) && tasks.length > 0) {
-      // Create all tasks
-      const taskPromises = tasks.map(taskData => 
-        Task.create({
-          journey: journey._id,
-          user: req.user._id,
-          name: taskData.name || taskData, // Support both { name: 'task' } and 'task' formats
-          completed: true
-        })
-      );
-      
-      createdTasks = await Promise.all(taskPromises);
-
-      // Update journey stats based on created tasks
-      const stats = updateJourneyStats(createdTasks);
-      journey.currentStreak = stats.currentStreak;
-      journey.longestStreak = stats.longestStreak;
-      journey.totalDays = stats.totalDays;
-      await journey.save();
+    // If journey starts immediately, send notification now
+    if (status === 'active') {
+      try {
+        const payload = pushService.createJourneyStartPayload(journey);
+        await pushService.sendToUser(req.user._id, payload);
+        
+        journey.notificationSent = true;
+        await journey.save();
+      } catch (error) {
+        console.error('Failed to send immediate notification:', error);
+        // Don't fail journey creation if notification fails
+      }
     }
 
     res.status(201).json({
@@ -49,7 +47,9 @@ export const createJourney = async (req, res) => {
       message: 'Journey created successfully',
       data: {
         journey,
-        tasks: createdTasks
+        status: status === 'pending' 
+          ? 'Journey scheduled - you will receive notifications before it starts'
+          : 'Journey started - notification sent'
       }
     });
   } catch (error) {
@@ -67,28 +67,30 @@ export const createJourney = async (req, res) => {
  */
 export const getJourneys = async (req, res) => {
   try {
-    const { status = 'active' } = req.query;
+    const journeys = await Journey.find({ user: req.user._id })
+      .sort({ startDate: -1 });
+
+    // Update status for any journeys that should have started
+    const now = new Date();
+    const updates = [];
     
-    let filter = { user: req.user._id };
-    
-    if (status === 'active') {
-      filter.isActive = true;
-    } else if (status === 'completed') {
-      filter.isActive = false;
+    for (const journey of journeys) {
+      if (journey.status === 'pending' && journey.startDate <= now) {
+        journey.status = 'active';
+        updates.push(journey.save());
+      }
     }
-    // 'all' - no additional filter
+    
+    if (updates.length > 0) {
+      await Promise.all(updates);
+    }
 
-    const journeys = await Journey.find(filter)
-      .sort({ createdAt: -1 })
-      .select('-resources'); // Exclude resources for list view
-
-    res.status(200).json({
+    res.json({
       success: true,
-      count: journeys.length,
-      data: journeys
+      data: { journeys }
     });
   } catch (error) {
-    res.status(500).json({
+    res.status(400).json({
       success: false,
       message: error.message
     });
@@ -163,11 +165,11 @@ export const updateJourney = async (req, res) => {
       });
     }
 
-    const { title, description, targetDays, notes } = req.body;
+    const { title, description, targetDays, notes, isActive } = req.body;
 
     journey = await Journey.findByIdAndUpdate(
       req.params.id,
-      { title, description, targetDays, notes },
+      { title, description, targetDays, notes, isActive },
       { new: true, runValidators: true }
     );
 
@@ -208,9 +210,12 @@ export const deleteJourney = async (req, res) => {
       });
     }
 
-    // Soft delete - mark as inactive
-    journey.isActive = false;
-    await journey.save();
+    // Hard delete journey and its tasks
+    await Task.deleteMany({ journey: journey._id });
+    await Journey.findByIdAndDelete(req.params.id);
+
+    // Note: We should ideally also delete resources from Cloudinary here
+    // but postponing that for optimization or background job
 
     res.status(200).json({
       success: true,

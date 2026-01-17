@@ -39,8 +39,16 @@ const getToday = () => {
 export const calculateCurrentStreak = (tasks) => {
   if (!tasks || tasks.length === 0) return 0;
 
-  // Get unique dates from tasks
-  const uniqueDates = [...new Set(tasks.map(task => getDateString(new Date(task.createdAt))))];
+  // Get unique dates from completed tasks
+  const uniqueDates = [...new Set(tasks
+    .filter(task => task.completed) // Only count completed tasks
+    .map(task => {
+      // Use completedAt only - if null (historic task), it won't be counted
+      const dateSource = task.completedAt;
+      return dateSource ? getDateString(new Date(dateSource)) : null;
+    })
+    .filter(date => date !== null) // Filter out invalid dates
+  )];
   uniqueDates.sort((a, b) => new Date(b) - new Date(a)); // Sort descending
 
   const today = getToday();
@@ -85,8 +93,17 @@ export const calculateLongestStreak = (tasks) => {
   if (!tasks || tasks.length === 0) return 0;
 
   // Get unique dates and sort ascending
-  const uniqueDates = [...new Set(tasks.map(task => getDateString(new Date(task.createdAt))))];
+  const uniqueDates = [...new Set(tasks
+    .filter(task => task.completed)
+    .map(task => {
+      const dateSource = task.completedAt;
+      return dateSource ? getDateString(new Date(dateSource)) : null;
+    })
+    .filter(date => date !== null)
+  )];
   uniqueDates.sort((a, b) => new Date(a) - new Date(b));
+
+  if (uniqueDates.length === 0) return 0;
 
   let longestStreak = 0;
   let currentStreak = 1;
@@ -119,7 +136,14 @@ export const calculateLongestStreak = (tasks) => {
 export const calculateTotalDays = (tasks) => {
   if (!tasks || tasks.length === 0) return 0;
   
-  const uniqueDates = new Set(tasks.map(task => getDateString(new Date(task.createdAt))));
+  const uniqueDates = new Set(tasks
+    .filter(task => task.completed)
+    .map(task => {
+      const dateSource = task.completedAt;
+      return dateSource ? getDateString(new Date(dateSource)) : null;
+    })
+    .filter(date => date !== null)
+  );
   return uniqueDates.size;
 };
 

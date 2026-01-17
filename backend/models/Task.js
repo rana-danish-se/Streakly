@@ -23,6 +23,9 @@ const taskSchema = new mongoose.Schema({
   completed: {
     type: Boolean,
     default: true
+  },
+  completedAt:{
+    type: Date,
   }
 }, {
   timestamps: true

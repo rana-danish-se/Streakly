@@ -28,6 +28,7 @@ export const createJourney = async (journeyData) => {
  */
 export const getJourneys = async (status = 'active') => {
   const response = await api.get(`/journeys?status=${status}`);
+  console.log(response.data);
   return response.data;
 };
 
@@ -99,6 +100,38 @@ export const deleteResource = async (journeyId, resourceId) => {
   return response.data;
 };
 
+/**
+ * Create a new task for a journey
+ * @param {string} journeyId - Journey ID
+ * @param {string} name - Task name
+ * @returns {Promise} Created task
+ */
+export const createTask = async (journeyId, name) => {
+  const response = await api.post(`/journeys/${journeyId}/tasks`, { name });
+  return response.data;
+};
+
+/**
+ * Update a task
+ * @param {string} taskId - Task ID
+ * @param {Object} updates - { name, completed }
+ * @returns {Promise} Updated task
+ */
+export const updateTask = async (taskId, updates) => {
+  const response = await api.put(`/tasks/${taskId}`, updates);
+  return response.data;
+};
+
+/**
+ * Delete a task
+ * @param {string} taskId - Task ID
+ * @returns {Promise} Deletion response
+ */
+export const deleteTask = async (taskId) => {
+  const response = await api.delete(`/tasks/${taskId}`);
+  return response.data;
+};
+
 export default {
   createJourney,
   getJourneys,
@@ -107,5 +140,8 @@ export default {
   deleteJourney,
   completeJourney,
   addResource,
-  deleteResource
+  deleteResource,
+  createTask,
+  updateTask,
+  deleteTask
 };

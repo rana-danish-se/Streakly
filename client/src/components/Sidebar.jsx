@@ -37,7 +37,7 @@ const Sidebar = () => {
 
   const menuItems = [
     { id: 'home', icon: FiHome, label: 'Dashboard', badge: null, path: '/dashboard' },
-    { id: 'journeys', icon: FiBook, label: 'My Journeys', badge: '12', path: '/journeys' },
+    { id: 'journeys', icon: FiBook, label: 'My Journeys', badge: '12', path: '/dashboard/journeys' },
   ];
 
   const handleLogout = async () => {

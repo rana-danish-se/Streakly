@@ -2,12 +2,15 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { AnimatePresence } from 'framer-motion';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Sidebar from './components/Sidebar';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Journeys from './pages/Journeys';
+import JourneyDetails from './pages/JourneyDetails';
 import './index.css';
 
 function AnimatedRoutes() {
@@ -20,6 +23,8 @@ function AnimatedRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard/journeys" element={<Journeys />} />
+        <Route path="/dashboard/journeys/:id" element={<JourneyDetails />} />
       </Routes>
     </AnimatePresence>
   );

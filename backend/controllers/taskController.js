@@ -34,7 +34,8 @@ export const createTask = async (req, res) => {
       journey: journeyId,
       user: req.user._id,
       name,
-      completed: true
+      completed: true,
+      completedAt: new Date()
     });
 
     // Update journey stats
@@ -170,18 +171,55 @@ export const updateTask = async (req, res) => {
       });
     }
 
-    const { name } = req.body;
+    const { name, completed } = req.body;
+    const updateData = {};
+
+    if (name) updateData.name = name;
+    
+    // Handle completion status change
+    if (completed !== undefined) {
+      updateData.completed = completed;
+      updateData.completedAt = completed ? new Date() : null;
+    }
 
     task = await Task.findByIdAndUpdate(
       req.params.id,
-      { name },
+      updateData,
       { new: true, runValidators: true }
     );
+
+    // If completion status changed, recalculate journey stats
+    if (completed !== undefined) {
+      const journey = await Journey.findById(task.journey);
+      if (journey) {
+        const allTasks = await Task.find({ journey: task.journey }).sort({ createdAt: -1 });
+        const stats = updateJourneyStats(allTasks);
+
+        journey.currentStreak = stats.currentStreak;
+        journey.longestStreak = stats.longestStreak;
+        journey.totalDays = stats.totalDays;
+        await journey.save();
+        
+        // Return stats with response to update UI immediately
+        return res.status(200).json({
+          success: true,
+          message: 'Task updated successfully',
+          data: {
+            task,
+            journeyStats: {
+              currentStreak: journey.currentStreak,
+              longestStreak: journey.longestStreak,
+              totalDays: journey.totalDays
+            }
+          }
+        });
+      }
+    }
 
     res.status(200).json({
       success: true,
       message: 'Task updated successfully',
-      data: task
+      data: { task }
     });
   } catch (error) {
     res.status(400).json({

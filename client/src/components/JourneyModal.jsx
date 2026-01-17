@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiPlus, FiTrash2, FiTarget, FiFileText, FiCalendar } from 'react-icons/fi';
 import { toast } from 'react-toastify';
@@ -11,37 +11,22 @@ const JourneyModal = ({ isOpen, onClose, onSuccess }) => {
     targetDays: 30,
     startDate: new Date().toISOString().split('T')[0]
   });
-  const [tasks, setTasks] = useState([]);
-  const [startMode, setStartMode] = useState('today'); // 'today' | 'custom'
-  const [currentTask, setCurrentTask] = useState('');
+  const [startMode, setStartMode] = useState('today'); 
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (!isOpen) {
+      return; 
+    }
+  }, [isOpen]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    // Clear error when user types
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
-  };
-
-  const handleAddTask = () => {
-    if (currentTask.trim()) {
-      const newTasks = currentTask
-        .split('\n')
-        .map(t => t.trim())
-        .filter(t => t.length > 0);
-      
-      if (newTasks.length > 0) {
-        setTasks(prev => [...prev, ...newTasks]);
-        setCurrentTask('');
-      }
-    }
-  };
-
-  const handleRemoveTask = (index) => {
-    setTasks(prev => prev.filter((_, i) => i !== index));
   };
 
   const validate = () => {
@@ -60,26 +45,22 @@ const JourneyModal = ({ isOpen, onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!validate()) return;
-
     setIsLoading(true);
     try {
       const journeyData = {
-        ...formData,
-        tasks: tasks.length > 0 ? tasks : undefined
+        ...formData
       };
 
       const response = await createJourney(journeyData);
-      
       if (response.success) {
         toast.success('Journey created successfully! 🎉');
         onSuccess(response.data);
         handleClose();
       }
     } catch (error) {
-      console.error('Error creating journey:', error);
-      toast.error(error.response?.data?.message || 'Failed to create journey');
+      console.error('Error saving journey:', error);
+      toast.error(error.response?.data?.message || 'Failed to save journey');
     } finally {
       setIsLoading(false);
     }
@@ -93,8 +74,6 @@ const JourneyModal = ({ isOpen, onClose, onSuccess }) => {
       startDate: new Date().toISOString().split('T')[0] 
     });
     setStartMode('today');
-    setTasks([]);
-    setCurrentTask('');
     setErrors({});
     onClose();
   };
@@ -253,60 +232,6 @@ const JourneyModal = ({ isOpen, onClose, onSuccess }) => {
                   />
                   {errors.targetDays && (
                     <p className="text-sm text-red-600 dark:text-red-400 mt-1">{errors.targetDays}</p>
-                  )}
-                </div>
-
-                {/* Initial Tasks */}
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">
-                    <FiPlus className="w-4 h-4" />
-                    Initial Tasks (Optional)
-                  </label>
-                  <p className="text-xs text-gray-500 dark:text-slate-400 mb-3">Add tasks you've already completed to start with a streak!</p>
-                  
-                  <div className="space-y-3 mb-3">
-                    <textarea
-                      value={currentTask}
-                      onChange={(e) => setCurrentTask(e.target.value)}
-                      placeholder={'Enter tasks...\nEach line represents a new task'}
-                      className="w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 focus:border-teal-500 rounded-xl focus:outline-none text-gray-900 dark:text-slate-50 transition-all min-h-[120px] resize-y"
-                    />
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-gray-500 dark:text-slate-400">
-                        Press Enter to add multiple tasks at once
-                      </p>
-                      <button
-                        type="button"
-                        onClick={handleAddTask}
-                        className="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl transition-colors flex items-center gap-2 font-medium"
-                      >
-                        <FiPlus className="w-4 h-4" />
-                        Add Tasks
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Tasks List */}
-                  {tasks.length > 0 && (
-                    <div className="space-y-2 max-h-40 overflow-y-auto">
-                      {tasks.map((task, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          className="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700"
-                        >
-                          <span className="text-sm text-gray-700 dark:text-slate-300">{task}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveTask(index)}
-                            className="p-1 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg transition-colors"
-                          >
-                            <FiTrash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
-                          </button>
-                        </motion.div>
-                      ))}
-                    </div>
                   )}
                 </div>
 

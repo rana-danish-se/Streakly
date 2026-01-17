@@ -1,0 +1,101 @@
+import express from "express";
+import router from "express-promise-router";
+import PushSubscription from "../models/PushSubscription";
+import { protect } from "../middleware/auth";
+
+// Get VAPID public key (needed by client)
+router.get('/vapid-public-key', (req, res) => {
+  res.json({
+    success: true,
+    publicKey: process.env.VAPID_PUBLIC_KEY
+  });
+});
+
+// Subscribe to push notifications
+router.post('/subscribe', protect, async (req, res) => {
+  try {
+    const { endpoint, keys } = req.body;
+
+    // Check if subscription already exists
+    let subscription = await PushSubscription.findOne({ endpoint });
+
+    if (subscription) {
+      // Update existing subscription
+      subscription.user = req.user._id;
+      subscription.keys = keys;
+      subscription.isActive = true;
+      subscription.userAgent = req.headers['user-agent'];
+      await subscription.save();
+    } else {
+      // Create new subscription
+      subscription = await PushSubscription.create({
+        user: req.user._id,
+        endpoint,
+        keys,
+        userAgent: req.headers['user-agent']
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Subscribed to push notifications',
+      data: { subscription }
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+// Unsubscribe from push notifications
+router.post('/unsubscribe', protect, async (req, res) => {
+  try {
+    const { endpoint } = req.body;
+
+    await PushSubscription.findOneAndUpdate(
+      { endpoint, user: req.user._id },
+      { isActive: false }
+    );
+
+    res.json({
+      success: true,
+      message: 'Unsubscribed from push notifications'
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+// Get user's subscriptions
+router.get('/my-subscriptions', protect, async (req, res) => {
+  try {
+    const subscriptions = await PushSubscription.find({
+      user: req.user._id,
+      isActive: true
+    });
+
+    res.json({
+      success: true,
+      data: { subscriptions }
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+export default router;
+
+// WHY THESE ROUTES?
+// - /vapid-public-key: Client needs this to create subscriptions
+// - /subscribe: Saves subscription from browser to database
+// - Update logic: User might resubscribe from same browser
+// - userAgent: Helps identify which device subscription is from
+// - /unsubscribe: Lets users opt out of notifications
