@@ -69,8 +69,15 @@ export const deleteJourney = async (journeyId) => {
  * @param {string} notes - Optional completion notes
  * @returns {Promise} Completed journey
  */
-export const completeJourney = async (journeyId, notes) => {
-  const response = await api.post(`/journeys/${journeyId}/complete`, { notes });
+// Removed duplicate completeJourney
+
+/**
+ * Reactivate a completed journey
+ * @param {string} journeyId - Journey ID
+ * @returns {Promise} Reactivated journey
+ */
+export const reactivateJourney = async (journeyId) => {
+  const response = await api.post(`/journeys/${journeyId}/reactivate`);
   return response.data;
 };
 
@@ -101,6 +108,17 @@ export const deleteResource = async (journeyId, resourceId) => {
 };
 
 /**
+ * Complete a journey
+ * @param {string} journeyId - Journey ID
+ * @param {string} notes - Optional completion notes
+ * @returns {Promise} Completed journey
+ */
+export const completeJourney = async (journeyId, notes) => {
+  const response = await api.post(`/journeys/${journeyId}/complete`, { notes });
+  return response.data;
+};
+
+/**
  * Create a new task for a journey
  * @param {string} journeyId - Journey ID
  * @param {string} name - Task name
@@ -108,6 +126,17 @@ export const deleteResource = async (journeyId, resourceId) => {
  */
 export const createTask = async (journeyId, name) => {
   const response = await api.post(`/journeys/${journeyId}/tasks`, { name });
+  return response.data;
+};
+
+/**
+ * Create multiple tasks for a journey
+ * @param {string} journeyId - Journey ID
+ * @param {Array<string>} tasks - Array of task names
+ * @returns {Promise} Created tasks response
+ */
+export const createBulkTasks = async (journeyId, tasks) => {
+  const response = await api.post(`/journeys/${journeyId}/tasks/bulk`, { tasks });
   return response.data;
 };
 
@@ -142,6 +171,8 @@ export default {
   addResource,
   deleteResource,
   createTask,
+  createBulkTasks,
   updateTask,
-  deleteTask
+  deleteTask,
+  reactivateJourney
 };

@@ -1,5 +1,5 @@
-import webPush from "../config/webPush";
-import PushSubscription from "../models/PushSubscription";
+import webPush from "../config/webPush.js";
+import PushSubscription from "../models/PushSubscription.js";
 
 class PushNotificationService {
   // Send notification to a specific user

@@ -1,6 +1,6 @@
 import cron from "node-cron";
-import Journey from "../models/Journey";
-import pushService from "../services/pushNotificationService";
+import Journey from "../models/Journey.js";
+import pushService from "../services/pushNotificationService.js";
 
 class JourneyNotificationJobs {
   
@@ -39,7 +39,7 @@ class JourneyNotificationJobs {
       const journeys = await Journey.find({
         startDate: { $lte: now },
         notificationSent: false,
-        status: 'pending'
+        status: { $in: ['pending', 'active'] }
       }).populate('user', 'name email');
 
       console.log(`Found ${journeys.length} journeys to start`);

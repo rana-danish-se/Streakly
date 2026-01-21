@@ -37,4 +37,18 @@ api.interceptors.response.use(
   }
 );
 
+// Push notification API endpoints
+export const pushAPI = {
+  // Get VAPID public key
+  getPublicKey: () => api.get('/push/vapid-public-key'),
+  
+  // Subscribe to push notifications
+  subscribe: (subscription) => api.post('/push/subscribe', subscription),
+  
+  // Unsubscribe from push notifications
+  unsubscribe: (endpoint) => api.post('/push/unsubscribe', { endpoint }),
+  
+  // Get user's subscriptions
+  getSubscriptions: () => api.get('/push/my-subscriptions'),
+};
 export default api;

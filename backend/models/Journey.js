@@ -70,6 +70,13 @@ const journeySchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    // Persistent progress field
+    progress: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100
+    },
     isActive: {
       type: Boolean,
       default: true,
@@ -123,12 +130,6 @@ journeySchema.index({ user: 1, isActive: 1 });
 journeySchema.index({ user: 1, createdAt: -1 });
 journeySchema.index({ startDate: 1, status: 1, notificationSent: 1 });
 
-// Virtual for progress percentage
-journeySchema.virtual("progressPercentage").get(function () {
-  if (this.targetDays === 0) return 0;
-  return Math.min(Math.round((this.totalDays / this.targetDays) * 100), 100);
-});
-
 // Method to add resource
 journeySchema.methods.addResource = function (resourceData) {
   if (this.resources.length >= 20) {
@@ -149,6 +150,7 @@ journeySchema.methods.removeResource = function (resourceId) {
 // Method to mark as completed
 journeySchema.methods.markCompleted = function (completionNotes) {
   this.isActive = false;
+  this.status = 'completed';
   this.completedAt = new Date();
   if (completionNotes) {
     this.notes = completionNotes;

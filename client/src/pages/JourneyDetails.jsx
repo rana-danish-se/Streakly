@@ -10,8 +10,10 @@ import Sidebar from '../components/Sidebar';
 import TaskItem from '../components/TaskItem';
 import RenameJourneyModal from '../components/RenameJourneyModal';
 import { 
-  getJourney, createTask, updateTask, deleteTask
+  getJourney, createBulkTasks, updateTask, deleteTask, 
+  completeJourney, reactivateJourney 
 } from '../services/journeyService';
+import Confetti from 'react-confetti';
 
 const JourneyDetails = () => {
   const { id } = useParams();
@@ -24,13 +26,29 @@ const JourneyDetails = () => {
   const [newTaskName, setNewTaskName] = useState('');
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   
-  // Stats
   const [stats, setStats] = useState({
     currentStreak: 0,
     longestStreak: 0,
     totalDays: 0,
     progress: 0
   });
+
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchJourneyDetails = async () => {
@@ -46,7 +64,7 @@ const JourneyDetails = () => {
             currentStreak: j.currentStreak || 0,
             longestStreak: j.longestStreak || 0,
             totalDays: j.totalDays || 0,
-            progress: j.progressPercentage || 0
+            progress: j.progress || 0
           });
         }
       } catch (error) {
@@ -65,19 +83,33 @@ const JourneyDetails = () => {
     e.preventDefault();
     if (!newTaskName.trim()) return;
 
+    // Check if journey is completed
+    if (journey.status === 'completed') {
+      toast.error('Journey is completed. Reactivate to add tasks.');
+      return;
+    }
+
     try {
-      const response = await createTask(id, newTaskName);
+      // Split by newline and filter empty lines
+      const tasks = newTaskName.split('\n').map(t => t.trim()).filter(t => t);
+      
+      if (tasks.length === 0) return;
+
+      const response = await createBulkTasks(id, tasks);
+      
       if (response.success) {
-        setTasks(prev => [response.data.task, ...prev]);
+        // Add new tasks to top of list
+        setTasks(prev => [...response.data.tasks, ...prev]);
         setNewTaskName('');
         
         if (response.data.journeyStats) {
           setStats(prev => ({ ...prev, ...response.data.journeyStats }));
         }
-        toast.success('Task added');
+        toast.success(`${tasks.length} task${tasks.length > 1 ? 's' : ''} added`);
       }
     } catch (err) {
-      toast.error('Failed to add task');
+      console.error(err);
+      toast.error(err.response?.data?.message || 'Failed to add tasks');
     }
   };
 
@@ -101,18 +133,54 @@ const JourneyDetails = () => {
         }
       }
     } catch (err) {
-      toast.error('Failed to update task');
+      toast.error(err.response?.data?.message || 'Failed to update task');
     }
   };
 
   const handleDeleteTask = async (taskId) => {
     if (!window.confirm('Delete this task?')) return;
     try {
-      await deleteTask(taskId);
-      setTasks(prev => prev.filter(t => t._id !== taskId));
-      toast.success('Task deleted');
+      const response = await deleteTask(taskId);
+      if (response.success) {
+        setTasks(prev => prev.filter(t => t._id !== taskId));
+        
+        if (response.data.journeyStats) {
+          setStats(prev => ({ ...prev, ...response.data.journeyStats }));
+        }
+        toast.success('Task deleted');
+      }
     } catch (err) {
-      toast.error('Failed to delete task');
+      toast.error(err.response?.data?.message || 'Failed to delete task');
+    }
+  };
+
+  const handleCompleteJourney = async () => {
+    if (!window.confirm('Are you sure you want to complete this journey? You won\'t be able to edit tasks unless you reactivate it.')) return;
+    
+    try {
+      const response = await completeJourney(id);
+      if (response.success) {
+        setJourney(response.data);
+        setShowConfetti(true);
+        toast.success('Congratulations! Journey Completed! 🎉');
+        setTimeout(() => setShowConfetti(false), 8000);
+      }
+    } catch (err) {
+      toast.error('Failed to complete journey');
+    }
+  };
+
+  const handleReactivateJourney = async () => {
+    if (!window.confirm('Reactivate this journey? This will allow you to edit tasks again.')) return;
+    
+    try {
+      const response = await reactivateJourney(id);
+      if (response.success) {
+        setJourney(response.data);
+        toast.success('Journey reactivated');
+      }
+    } catch (err) {
+      toast.error('Failed to reactivate journey');
     }
   };
 
@@ -128,6 +196,14 @@ const JourneyDetails = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-100 dark:from-slate-950 dark:via-slate-900/50 dark:to-slate-950 p-4">
+      {showConfetti && (
+        <Confetti
+          width={windowSize.width}
+          height={windowSize.height}
+          recycle={false}
+          numberOfPieces={500}
+        />
+      )}
       <div className="flex gap-4 h-[calc(100vh-2rem)]">
         <Sidebar />
         
@@ -149,6 +225,26 @@ const JourneyDetails = () => {
                    <p className="text-white/90 text-lg max-w-2xl">{journey.description}</p>
                  </div>
                  <div className="flex gap-2">
+                   {/* Completion Controls */}
+                   {journey.status === 'active' && stats.progress === 100 && (
+                     <button
+                       onClick={handleCompleteJourney} 
+                       className="p-2 bg-yellow-400 text-yellow-900 rounded-lg hover:bg-yellow-300 transition-colors shadow-lg animate-bounce"
+                       title="Complete Journey"
+                     >
+                       <p className="text-sm font-bold px-3">🏆 Finish Journey</p>
+                     </button>
+                   )}
+                   
+                   {journey.status === 'completed' && (
+                     <button
+                       onClick={handleReactivateJourney} 
+                       className="p-2 bg-white/20 backdrop-blur-md rounded-lg text-white hover:bg-white/30 transition-colors"
+                     >
+                       <p className="text-sm font-medium px-2">Reactivate</p>
+                     </button>
+                   )}
+
                    <button 
                      onClick={() => setIsRenameModalOpen(true)}
                      className="p-2 bg-white/20 backdrop-blur-md rounded-lg text-white hover:bg-white/30 transition-colors"
@@ -201,23 +297,42 @@ const JourneyDetails = () => {
                     </h2>
                   </div>
                   
-                  {/* Add Task Input */}
-                  <form onSubmit={handleCreateTask} className="relative">
-                    <input
-                      type="text"
-                      value={newTaskName}
-                      onChange={(e) => setNewTaskName(e.target.value)}
-                      placeholder="Log a new task..."
-                      className="w-full pl-6 pr-14 py-4 bg-gray-50 dark:bg-slate-800 rounded-2xl border-2 border-transparent focus:border-teal-500 focus:outline-none transition-all text-gray-900 dark:text-slate-50 placeholder:text-gray-400"
-                    />
-                    <button 
-                      type="submit"
-                      disabled={!newTaskName.trim()}
-                      className="absolute right-2 top-2 p-2 bg-teal-600 text-white rounded-xl shadow-lg disabled:opacity-50 disabled:shadow-none transition-all hover:scale-105"
-                    >
-                      <FiPlus className="w-5 h-5" />
-                    </button>
-                  </form>
+                  {/* Add Task Input - Hide if completed */}
+                  {journey.status !== 'completed' && (
+                    <form onSubmit={handleCreateTask} className="relative">
+                      <textarea
+                        value={newTaskName}
+                        onChange={(e) => setNewTaskName(e.target.value)}
+                        placeholder="Log new tasks (one per line)..."
+                        rows={3}
+                        className="w-full pl-6 pr-14 py-4 bg-gray-50 dark:bg-slate-800 rounded-2xl border-2 border-transparent focus:border-teal-500 focus:outline-none transition-all text-gray-900 dark:text-slate-50 placeholder:text-gray-400 resize-none"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleCreateTask(e);
+                          }
+                        }}
+                      />
+                      <button 
+                        type="submit"
+                        disabled={!newTaskName.trim()}
+                        className="absolute right-2 top-2 p-2 bg-teal-600 text-white rounded-xl shadow-lg disabled:opacity-50 disabled:shadow-none transition-all hover:scale-105"
+                      >
+                        <FiPlus className="w-5 h-5" />
+                      </button>
+                    </form>
+                  )}
+
+                  {journey.status === 'completed' && (
+                    <div className="bg-teal-50 dark:bg-teal-900/20 p-6 rounded-2xl border border-teal-100 dark:border-teal-900/30 text-center">
+                      <p className="text-teal-800 dark:text-teal-200 font-medium text-lg">
+                        🎉 This journey is completed on {new Date(journey.completedAt).toLocaleDateString()}!
+                      </p>
+                      <p className="text-teal-600 dark:text-teal-400 mt-1">
+                        Reactivate it to make further changes.
+                      </p>
+                    </div>
+                  )}
 
                   <div className="space-y-3">
                     {tasks.length > 0 ? (
@@ -225,6 +340,8 @@ const JourneyDetails = () => {
                         <TaskItem 
                           key={task._id} 
                           task={task} 
+                          journeyStatus={journey.status}
+                          startDate={journey.startDate}
                           onUpdate={handleUpdateTask} 
                           onDelete={handleDeleteTask}
                         />

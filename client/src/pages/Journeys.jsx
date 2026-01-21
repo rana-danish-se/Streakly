@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlus, FiSearch, FiMoreVertical, FiCalendar, FiTarget, FiActivity, FiTrendingUp, FiEdit2, FiTrash2, FiPause, FiPlay } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiMoreVertical, FiCalendar, FiTarget, FiActivity, FiTrendingUp, FiEdit2, FiTrash2, FiPause, FiPlay, FiArrowRight } from 'react-icons/fi';
 import Sidebar from '../components/Sidebar';
 import JourneyModal from '../components/JourneyModal';
 import RenameJourneyModal from '../components/RenameJourneyModal';
@@ -23,7 +23,7 @@ const Journeys = () => {
     try {
       setLoading(true);
       const data = await getJourneys('all');
-      setJourneys(data.data || []);
+      setJourneys(data.data.journeys || []);
     } catch (error) {
       console.error('Error fetching journeys:', error);
       toast.error('Failed to load journeys');
@@ -68,23 +68,22 @@ const Journeys = () => {
         await deleteJourney(journey._id);
         toast.success('Journey deleted successfully');
         fetchJourneys();
-      } catch (error) {
+      } catch {
         toast.error('Failed to delete journey');
       }
       setActiveMenuId(null);
     }
   };
 
-  const filteredJourneys = journeys
+  const filteredJourneys = journeys?.length > 0 ? journeys
     .filter(journey => {
       const matchesSearch = journey.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = filterStatus === 'all' 
         ? true 
-        : filterStatus === 'active' ? journey.isActive 
-        : !journey.isActive;
+        : journey.status === filterStatus;
       return matchesSearch && matchesStatus;
     })
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) : [];
 
   const JourneyCard = ({ journey }) => {
     const progress = journey.progressPercentage || 0;
@@ -98,23 +97,33 @@ const Journeys = () => {
         animate={{ opacity: 1, y: 0 }}
         whileHover={{ y: -4 }}
         transition={{ duration: 0.3 }}
-        className="group relative bg-white dark:bg-slate-800 rounded-3xl shadow-lg border border-gray-200 dark:border-slate-700 hover:shadow-2xl transition-all cursor-pointer overflow-hidden"
-        onClick={() => navigate(`/dashboard/journeys/${journey._id}`)}
+        className="group relative bg-white dark:bg-slate-800 rounded-3xl shadow-lg border border-gray-200 dark:border-slate-700 hover:shadow-2xl transition-all overflow-hidden flex flex-col"
       >
         {/* Gradient Header Bar */}
-        <div className="h-2 bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500" />
+        <div className="h-1.5 bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500" />
         
-        {/* Glow Effect */}
-        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-teal-500/5 to-transparent pointer-events-none" />
-        
-        <div className="p-6 relative">
+        <div className="p-6 pb-4 flex-1">
           {/* Header */}
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1 pr-4">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-slate-50 mb-2 line-clamp-1 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide border ${
+                  journey.isActive 
+                    ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20'
+                    : 'bg-gray-50 dark:bg-slate-700 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-600'
+                }`}>
+                  {journey.isActive ? 'Active' : 'Inactive'}
+                </span>
+                {journey.status === 'pending' && (
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide border bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20">
+                    Pending
+                  </span>
+                )}
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-slate-50 mb-1 line-clamp-1 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
                 {journey.title}
               </h3>
-              <p className="text-sm text-gray-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+              <p className="text-sm text-gray-500 dark:text-slate-400 line-clamp-2 leading-relaxed h-10">
                 {journey.description || 'No description provided'}
               </p>
             </div>
@@ -128,9 +137,9 @@ const Journeys = () => {
                 }}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
+                className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-gray-400 dark:text-slate-500"
               >
-                <FiMoreVertical className="text-gray-500 dark:text-slate-400" />
+                <FiMoreVertical />
               </motion.button>
               
               <AnimatePresence>
@@ -139,37 +148,37 @@ const Journeys = () => {
                     initial={{ opacity: 0, scale: 0.95, y: -10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-700 z-20 overflow-hidden"
+                    className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-200 dark:border-slate-700 z-20 overflow-hidden"
                   >
                     <button
                       onClick={(e) => handleRename(e, journey)}
-                      className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-3"
+                      className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"
                     >
-                      <FiEdit2 className="w-4 h-4 text-teal-500" />
-                      Rename Journey
+                      <FiEdit2 className="w-3.5 h-3.5 text-teal-500" />
+                      Rename
                     </button>
                     <button
                       onClick={(e) => handleToggleStatus(e, journey)}
-                      className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 border-t border-gray-100 dark:border-slate-700"
+                      className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors flex items-center gap-2 border-t border-gray-100 dark:border-slate-700"
                     >
                       {journey.isActive ? (
                         <>
-                          <FiPause className="w-4 h-4 text-amber-500" />
-                          Mark as Inactive
+                          <FiPause className="w-3.5 h-3.5 text-amber-500" />
+                          Pause
                         </>
                       ) : (
                         <>
-                          <FiPlay className="w-4 h-4 text-emerald-500" />
-                          Mark as Active
+                          <FiPlay className="w-3.5 h-3.5 text-emerald-500" />
+                          Resume
                         </>
                       )}
                     </button>
                     <button
                       onClick={(e) => handleDelete(e, journey)}
-                      className="w-full text-left px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center gap-3 border-t border-gray-100 dark:border-slate-700"
+                      className="w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center gap-2 border-t border-gray-100 dark:border-slate-700"
                     >
-                      <FiTrash2 className="w-4 h-4" />
-                      Delete Journey
+                      <FiTrash2 className="w-3.5 h-3.5" />
+                      Delete
                     </button>
                   </motion.div>
                 )}
@@ -177,105 +186,57 @@ const Journeys = () => {
             </div>
           </div>
 
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 gap-3 mb-5">
+            <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-3 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-lg">
+                🔥
+              </div>
+              <div>
+                <p className="text-xl font-bold text-gray-900 dark:text-slate-50 leading-none">{journey.currentStreak}</p>
+                <p className="text-[10px] uppercase font-bold text-gray-500 dark:text-slate-400 mt-1">Streak</p>
+              </div>
+            </div>
+            <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-3 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center text-teal-600 dark:text-teal-400">
+                <FiTarget />
+              </div>
+              <div>
+                <p className="text-xl font-bold text-gray-900 dark:text-slate-50 leading-none">{journey.targetDays}</p>
+                <p className="text-[10px] uppercase font-bold text-gray-500 dark:text-slate-400 mt-1">Goal</p>
+              </div>
+            </div>
+          </div>
+
           {/* Progress Bar */}
-          <div className="mb-5">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-xs font-semibold text-gray-600 dark:text-slate-400">Progress</span>
+          <div>
+            <div className="flex justify-between items-center mb-1.5">
+              <span className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Progress</span>
               <span className="text-xs font-bold text-teal-600 dark:text-teal-400">{progress}%</span>
             </div>
-            <div className="relative h-3 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
+            <div className="h-2 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 1, ease: "easeOut" }}
-                className="h-full bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 rounded-full relative overflow-hidden"
-              >
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                  animate={{ x: ['-100%', '200%'] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                />
-              </motion.div>
-            </div>
-          </div>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-3 gap-3 mb-5">
-            {/* Current Streak */}
-            <div className="relative p-4 bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10 rounded-2xl border border-orange-200/50 dark:border-orange-800/30 overflow-hidden">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-orange-400/10 dark:bg-orange-500/10 rounded-full blur-2xl" />
-              <div className="relative">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 bg-orange-500/20 dark:bg-orange-500/30 rounded-lg flex items-center justify-center">
-                    <span className="text-base">🔥</span>
-                  </div>
-                </div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-slate-50 mb-0.5">{journey.currentStreak}</p>
-                <p className="text-[10px] font-semibold text-orange-700 dark:text-orange-300 uppercase tracking-wide">Current Streak</p>
-              </div>
-            </div>
-
-            {/* Longest Streak */}
-            <div className="relative p-4 bg-gradient-to-br from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10 rounded-2xl border border-purple-200/50 dark:border-purple-800/30 overflow-hidden">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-purple-400/10 dark:bg-purple-500/10 rounded-full blur-2xl" />
-              <div className="relative">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 bg-purple-500/20 dark:bg-purple-500/30 rounded-lg flex items-center justify-center">
-                    <FiTrendingUp className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                  </div>
-                </div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-slate-50 mb-0.5">{journey.longestStreak}</p>
-                <p className="text-[10px] font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wide">Best Streak</p>
-              </div>
-            </div>
-
-            {/* Target Days */}
-            <div className="relative p-4 bg-gradient-to-br from-teal-50 to-teal-100/50 dark:from-teal-900/20 dark:to-teal-800/10 rounded-2xl border border-teal-200/50 dark:border-teal-800/30 overflow-hidden">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-teal-400/10 dark:bg-teal-500/10 rounded-full blur-2xl" />
-              <div className="relative">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 bg-teal-500/20 dark:bg-teal-500/30 rounded-lg flex items-center justify-center">
-                    <FiTarget className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-                  </div>
-                </div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-slate-50 mb-0.5">{journey.targetDays}</p>
-                <p className="text-[10px] font-semibold text-teal-700 dark:text-teal-300 uppercase tracking-wide">Target Days</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-slate-700">
-            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-400">
-              <FiCalendar className="w-3.5 h-3.5" />
-              <span className="font-medium">
-                Started {new Date(journey.startDate || journey.createdAt).toLocaleDateString('en-US', { 
-                  month: 'short', 
-                  day: 'numeric', 
-                  year: 'numeric' 
-                })}
-              </span>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              {daysRemaining > 0 && (
-                <span className="text-[10px] font-semibold text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-lg">
-                  {daysRemaining} days left
-                </span>
-              )}
-              <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${
-                journey.isActive 
-                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30'
-                  : 'bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-slate-400'
-              }`}>
-                {journey.isActive ? 'Active' : 'Inactive'}
-              </span>
+                className="h-full bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 rounded-full"
+              />
             </div>
           </div>
         </div>
 
-        {/* Hover Border Glow */}
-        <div className="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-teal-500/20 transition-colors pointer-events-none" />
+        {/* Footer Action */}
+        <div className="p-4 pt-0 mt-auto">
+          <button
+            onClick={() => navigate(`/dashboard/journeys/${journey._id}`)}
+            className="w-full py-3 px-4 bg-gray-50 hover:bg-teal-50 dark:bg-slate-700/50 dark:hover:bg-teal-900/20 text-gray-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400 rounded-xl transition-all duration-300 flex items-center justify-between group/btn border border-transparent hover:border-teal-200 dark:hover:border-teal-800"
+          >
+            <span className="text-sm font-semibold">View Details</span>
+            <div className="w-8 h-8 rounded-lg bg-white dark:bg-slate-600 shadow-sm flex items-center justify-center group-hover/btn:bg-teal-600 dark:group-hover/btn:bg-teal-500 group-hover/btn:text-white transition-all">
+              <FiArrowRight className="w-4 h-4 transform group-hover/btn:translate-x-0.5 transition-transform" />
+            </div>
+          </button>
+        </div>
       </motion.div>
     );
   };
@@ -315,7 +276,7 @@ const Journeys = () => {
               />
             </div>
             <div className="flex bg-gray-100 dark:bg-slate-800 p-1.5 rounded-xl gap-1">
-              {['active', 'completed', 'all'].map((status) => (
+              {['active', 'pending', 'completed', 'all'].map((status) => (
                 <button
                   key={status}
                   onClick={() => setFilterStatus(status)}

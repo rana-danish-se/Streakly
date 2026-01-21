@@ -1,8 +1,9 @@
-import express from "express";
-import router from "express-promise-router";
-import PushSubscription from "../models/PushSubscription";
-import { protect } from "../middleware/auth";
 
+import express from "express";
+import PushSubscription from "../models/PushSubscription.js";
+import { protect } from "../middleware/authMiddleware.js";
+
+const router = express.Router();
 // Get VAPID public key (needed by client)
 router.get('/vapid-public-key', (req, res) => {
   res.json({

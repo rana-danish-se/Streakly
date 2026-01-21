@@ -45,6 +45,7 @@ export const createTask = async (req, res) => {
     journey.currentStreak = stats.currentStreak;
     journey.longestStreak = stats.longestStreak;
     journey.totalDays = stats.totalDays;
+    journey.progress = stats.progress;
     await journey.save();
 
     res.status(201).json({
@@ -52,6 +53,82 @@ export const createTask = async (req, res) => {
       message: 'Task logged successfully',
       data: {
         task,
+        journeyStats: {
+          currentStreak: journey.currentStreak,
+          longestStreak: journey.longestStreak,
+          totalDays: journey.totalDays,
+          progress: journey.progress
+        }
+      }
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+// ... existing code ...
+};
+
+/**
+ * @desc    Create multiple tasks for a journey
+ * @route   POST /api/journeys/:journeyId/tasks/bulk
+ * @access  Private
+ */
+export const createBulkTasks = async (req, res) => {
+  try {
+    const { tasks } = req.body; // Array of task names
+    const journeyId = req.params.journeyId;
+
+    if (!Array.isArray(tasks) || tasks.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide an array of tasks'
+      });
+    }
+
+    // Check if journey exists and user owns it
+    const journey = await Journey.findById(journeyId);
+
+    if (!journey) {
+      return res.status(404).json({
+        success: false,
+        message: 'Journey not found'
+      });
+    }
+
+    if (journey.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to access this journey'
+      });
+    }
+
+    // Create tasks
+    const taskObjects = tasks.map(name => ({
+      journey: journeyId,
+      user: req.user._id,
+      name,
+      completed: false, // Explicitly set to false for new tasks
+    }));
+
+    const createdTasks = await Task.insertMany(taskObjects);
+
+    // Update journey stats
+    const allTasks = await Task.find({ journey: journeyId }).sort({ createdAt: -1 });
+    const stats = updateJourneyStats(allTasks);
+
+    journey.currentStreak = stats.currentStreak;
+    journey.longestStreak = stats.longestStreak;
+    journey.totalDays = stats.totalDays;
+    journey.progress = stats.progress;
+    await journey.save();
+
+    res.status(201).json({
+      success: true,
+      message: `${createdTasks.length} tasks created successfully`,
+      data: {
+        tasks: createdTasks,
         journeyStats: {
           currentStreak: journey.currentStreak,
           longestStreak: journey.longestStreak,
@@ -66,6 +143,7 @@ export const createTask = async (req, res) => {
     });
   }
 };
+
 
 /**
  * @desc    Get all tasks for a journey
@@ -167,11 +245,35 @@ export const updateTask = async (req, res) => {
     if (task.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
-        message: 'Not authorized to update this task'
+      message: 'Not authorized to update this task'
       });
     }
 
     const { name, completed } = req.body;
+    
+    // Check journey status BEFORE updating task
+    const journey = await Journey.findById(task.journey);
+    if (!journey) {
+      return res.status(404).json({
+        success: false,
+        message: 'Journey not found'
+      });
+    }
+
+    if (journey.status === 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: `Journey hasn't started yet. Starts on ${new Date(journey.startDate).toLocaleDateString()}`
+      });
+    }
+
+    if (journey.status === 'completed') {
+      return res.status(400).json({
+        success: false,
+        message: 'Journey is completed. Reactivate it to make changes.'
+      });
+    }
+
     const updateData = {};
 
     if (name) updateData.name = name;
@@ -189,31 +291,31 @@ export const updateTask = async (req, res) => {
     );
 
     // If completion status changed, recalculate journey stats
+    // If completion status changed, recalculate journey stats
     if (completed !== undefined) {
-      const journey = await Journey.findById(task.journey);
-      if (journey) {
-        const allTasks = await Task.find({ journey: task.journey }).sort({ createdAt: -1 });
-        const stats = updateJourneyStats(allTasks);
+      const allTasks = await Task.find({ journey: task.journey }).sort({ createdAt: -1 });
+      const stats = updateJourneyStats(allTasks);
 
-        journey.currentStreak = stats.currentStreak;
-        journey.longestStreak = stats.longestStreak;
-        journey.totalDays = stats.totalDays;
-        await journey.save();
-        
-        // Return stats with response to update UI immediately
-        return res.status(200).json({
-          success: true,
-          message: 'Task updated successfully',
-          data: {
-            task,
-            journeyStats: {
-              currentStreak: journey.currentStreak,
-              longestStreak: journey.longestStreak,
-              totalDays: journey.totalDays
-            }
+      journey.currentStreak = stats.currentStreak;
+      journey.longestStreak = stats.longestStreak;
+      journey.totalDays = stats.totalDays;
+      journey.progress = stats.progress;
+      await journey.save();
+      
+      // Return stats with response to update UI immediately
+      return res.status(200).json({
+        success: true,
+        message: 'Task updated successfully',
+        data: {
+          task,
+          journeyStats: {
+            currentStreak: journey.currentStreak,
+            longestStreak: journey.longestStreak,
+            totalDays: journey.totalDays,
+            progress: journey.progress
           }
-        });
-      }
+        }
+      });
     }
 
     res.status(200).json({
@@ -268,6 +370,19 @@ export const deleteTask = async (req, res) => {
       journey.longestStreak = stats.longestStreak;
       journey.totalDays = stats.totalDays;
       await journey.save();
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Task deleted successfully',
+        data: {
+             journeyStats: {
+                currentStreak: journey.currentStreak,
+                longestStreak: journey.longestStreak,
+                totalDays: journey.totalDays,
+                progress: journey.progressPercentage
+            }
+        }
+      });
     }
 
     res.status(200).json({

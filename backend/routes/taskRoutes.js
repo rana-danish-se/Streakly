@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   createTask,
+  createBulkTasks,
   getJourneyTasks,
   getTask,
   updateTask,
@@ -17,6 +18,9 @@ router.use(protect);
 router.route('/')
   .get(getJourneyTasks)  // GET /api/journeys/:journeyId/tasks
   .post(createTask);     // POST /api/journeys/:journeyId/tasks
+
+router.route('/bulk')
+  .post(createBulkTasks); // POST /api/journeys/:journeyId/tasks/bulk
 
 // Individual task routes (top-level)
 router.route('/:id')

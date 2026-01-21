@@ -148,6 +148,20 @@ export const calculateTotalDays = (tasks) => {
 };
 
 /**
+ * Calculate progress percentage based on completed tasks
+ * @param {Array} tasks - Array of task objects
+ * @returns {number}
+ */
+export const calculateProgress = (tasks) => {
+  if (!tasks || tasks.length === 0) return 0;
+
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter(task => task.completed).length;
+
+  return Math.round((completedTasks / totalTasks) * 100);
+};
+
+/**
  * Update journey stats based on tasks
  * @param {Object} journey - Journey document
  * @param {Array} tasks - Array of task objects
@@ -157,10 +171,12 @@ export const updateJourneyStats = (tasks) => {
   const currentStreak = calculateCurrentStreak(tasks);
   const longestStreak = calculateLongestStreak(tasks);
   const totalDays = calculateTotalDays(tasks);
+  const progress = calculateProgress(tasks);
 
   return {
     currentStreak,
     longestStreak: Math.max(longestStreak, currentStreak),
-    totalDays
+    totalDays,
+    progress
   };
 };

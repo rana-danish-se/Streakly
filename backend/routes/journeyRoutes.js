@@ -6,6 +6,7 @@ import {
   updateJourney,
   deleteJourney,
   completeJourney,
+  reactivateJourney,
   addResource,
   deleteResource
 } from '../controllers/journeyController.js';
@@ -28,7 +29,8 @@ router.route('/:id')
   .delete(deleteJourney); // DELETE /api/journeys/:id
 
 // Journey completion
-router.post('/:id/complete', completeJourney); // POST /api/journeys/:id/complete
+router.post('/:id/complete', completeJourney);     // POST /api/journeys/:id/complete
+router.post('/:id/reactivate', reactivateJourney); // POST /api/journeys/:id/reactivate
 
 // Resource management
 router.route('/:id/resources')

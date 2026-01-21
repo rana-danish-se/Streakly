@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from './components/Sidebar';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -30,25 +31,30 @@ function AnimatedRoutes() {
   );
 }
 
+import NotificationPermission from './components/NotificationPermission';
+
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Router>
-          <AnimatedRoutes />
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop={true}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-          />
-        </Router>
+        <NotificationProvider>
+          <Router>
+            <AnimatedRoutes />
+            <NotificationPermission />
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop={true}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="light"
+            />
+          </Router>
+        </NotificationProvider>
       </AuthProvider>
     </ThemeProvider>
   );

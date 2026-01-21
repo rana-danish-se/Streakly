@@ -2,13 +2,26 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiCheck, FiMoreVertical, FiEdit2, FiTrash2, FiClock } from 'react-icons/fi';
 
-const TaskItem = ({ task, onUpdate, onDelete }) => {
+import { toast } from 'react-toastify';
+
+const TaskItem = ({ task, journeyStatus, startDate, onUpdate, onDelete }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(task.name);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleToggleComplete = () => {
-    onUpdate(task._id, { completed: !task.completed });
+  const handleToggleComplete = async () => {
+    if (journeyStatus === 'pending') {
+      toast.info(`Journey starts on ${new Date(startDate).toLocaleDateString()}`);
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      await onUpdate(task._id, { completed: !task.completed });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSaveEdit = () => {
@@ -43,14 +56,23 @@ const TaskItem = ({ task, onUpdate, onDelete }) => {
       {/* Checkbox */}
       <button
         onClick={handleToggleComplete}
+        disabled={isLoading}
         className={`flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center border-2 transition-all ${
           task.completed
             ? 'bg-teal-500 border-teal-500 text-white'
             : 'bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-600 hover:border-teal-400 dark:hover:border-teal-400'
-        }`}
+        } ${isLoading ? 'opacity-80 cursor-wait' : ''}`}
       >
-        <AnimatePresence>
-          {task.completed && (
+        <AnimatePresence mode="wait">
+          {isLoading ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+            >
+              <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin" />
+            </motion.div>
+          ) : task.completed && (
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}

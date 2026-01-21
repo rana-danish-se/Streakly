@@ -7,7 +7,8 @@ import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import journeyRoutes from './routes/journeyRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
-import pushSubscriptionRoutes from './routes/pushSubscriptionRoutes.js';
+import pushSubscriptionRoutes from './routes/pushSubscription.js';
+import initStreakReminder from './jobs/streakReminder.js';
 
 // Load environment variables
 dotenv.config();
@@ -84,4 +85,7 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 Client URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}`);
+  
+  // Initialize Cron Jobs
+  initStreakReminder();
 });

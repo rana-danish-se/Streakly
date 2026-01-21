@@ -1,6 +1,6 @@
 // models/PushSubscription.js
 
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const pushSubscriptionSchema = new mongoose.Schema({
   user: {
@@ -44,7 +44,7 @@ const pushSubscriptionSchema = new mongoose.Schema({
 // Index for faster queries
 pushSubscriptionSchema.index({ user: 1, isActive: 1 });
 
-module.exports = mongoose.model('PushSubscription', pushSubscriptionSchema);
+export default mongoose.model('PushSubscription', pushSubscriptionSchema);
 
 // WHY THIS MODEL?
 // - endpoint: Unique URL for each browser subscription (where to send notifications)
