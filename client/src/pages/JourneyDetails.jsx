@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
+import { motion, AnimatePresence } from 'framer-motion'; 
 import { 
   FiArrowLeft, FiCalendar, FiTarget, FiActivity, 
-  FiTrendingUp, FiPlus, FiLink, FiFileText 
+  FiTrendingUp, FiPlus, FiMoreHorizontal, FiCheckCircle, FiClock
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import Sidebar from '../components/Sidebar';
@@ -11,9 +11,11 @@ import TaskItem from '../components/TaskItem';
 import RenameJourneyModal from '../components/RenameJourneyModal';
 import { 
   getJourney, createBulkTasks, updateTask, deleteTask, 
-  completeJourney, reactivateJourney 
+  completeJourney, reactivateJourney, startJourney 
 } from '../services/journeyService';
 import Confetti from 'react-confetti';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
 
 const JourneyDetails = () => {
   const { id } = useParams();
@@ -50,6 +52,16 @@ const JourneyDetails = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const sortTasks = (tasksToSort) => {
+    return [...tasksToSort].sort((a, b) => {
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      if (a.completed) {
+         return new Date(b.completedAt || 0) - new Date(a.completedAt || 0);
+      }
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+  };
+
   useEffect(() => {
     const fetchJourneyDetails = async () => {
       try {
@@ -57,14 +69,12 @@ const JourneyDetails = () => {
         const data = await getJourney(id);
         if (data.success) {
           setJourney(data.data.journey);
-          setTasks(data.data.recentTasks || []);
-          
-          const j = data.data.journey;
-          setStats({
-            currentStreak: j.currentStreak || 0,
-            longestStreak: j.longestStreak || 0,
-            totalDays: j.totalDays || 0,
-            progress: j.progress || 0
+          setTasks(sortTasks(data.data.recentTasks || []));
+          setStats(data.data.journeyStats || {
+            currentStreak: data.data.journey.currentStreak || 0,
+            longestStreak: data.data.journey.longestStreak || 0,
+            totalDays: data.data.journey.totalDays || 0,
+            progress: data.data.journey.progress || 0
           });
         }
       } catch (error) {
@@ -83,32 +93,26 @@ const JourneyDetails = () => {
     e.preventDefault();
     if (!newTaskName.trim()) return;
 
-    // Check if journey is completed
     if (journey.status === 'completed') {
       toast.error('Journey is completed. Reactivate to add tasks.');
       return;
     }
 
     try {
-      // Split by newline and filter empty lines
-      const tasks = newTaskName.split('\n').map(t => t.trim()).filter(t => t);
-      
-      if (tasks.length === 0) return;
+      const tasksList = newTaskName.split('\n').map(t => t.trim()).filter(t => t);
+      if (tasksList.length === 0) return;
 
-      const response = await createBulkTasks(id, tasks);
+      const response = await createBulkTasks(id, tasksList);
       
       if (response.success) {
-        // Add new tasks to top of list
-        setTasks(prev => [...response.data.tasks, ...prev]);
+        setTasks(prev => sortTasks([...response.data.tasks, ...prev]));
         setNewTaskName('');
-        
         if (response.data.journeyStats) {
           setStats(prev => ({ ...prev, ...response.data.journeyStats }));
         }
-        toast.success(`${tasks.length} task${tasks.length > 1 ? 's' : ''} added`);
+        toast.success(`${tasksList.length} task${tasksList.length > 1 ? 's' : ''} added`);
       }
     } catch (err) {
-      console.error(err);
       toast.error(err.response?.data?.message || 'Failed to add tasks');
     }
   };
@@ -117,19 +121,14 @@ const JourneyDetails = () => {
     try {
       const response = await updateTask(taskId, updates);
       if (response.success) {
-        // Update task in list
-        setTasks(prev => prev.map(t => 
-          t._id === taskId ? response.data.task : t
-        ));
+        setTasks(prev => {
+          const updatedTasks = prev.map(t => t._id === taskId ? response.data.task : t);
+          return sortTasks(updatedTasks);
+        });
 
-        // Update stats if returned (e.g. on completion toggle)
         if (response.data.journeyStats) {
           setStats(prev => ({ ...prev, ...response.data.journeyStats }));
-          // Also update local journey state if needed
-          setJourney(prev => ({
-            ...prev,
-            currentStreak: response.data.journeyStats.currentStreak
-          }));
+          setJourney(prev => ({ ...prev, currentStreak: response.data.journeyStats.currentStreak }));
         }
       }
     } catch (err) {
@@ -143,7 +142,6 @@ const JourneyDetails = () => {
       const response = await deleteTask(taskId);
       if (response.success) {
         setTasks(prev => prev.filter(t => t._id !== taskId));
-        
         if (response.data.journeyStats) {
           setStats(prev => ({ ...prev, ...response.data.journeyStats }));
         }
@@ -155,8 +153,7 @@ const JourneyDetails = () => {
   };
 
   const handleCompleteJourney = async () => {
-    if (!window.confirm('Are you sure you want to complete this journey? You won\'t be able to edit tasks unless you reactivate it.')) return;
-    
+    if (!window.confirm('Are you sure you want to complete this journey?')) return;
     try {
       const response = await completeJourney(id);
       if (response.success) {
@@ -171,8 +168,7 @@ const JourneyDetails = () => {
   };
 
   const handleReactivateJourney = async () => {
-    if (!window.confirm('Reactivate this journey? This will allow you to edit tasks again.')) return;
-    
+    if (!window.confirm('Reactivate this journey?')) return;
     try {
       const response = await reactivateJourney(id);
       if (response.success) {
@@ -184,10 +180,23 @@ const JourneyDetails = () => {
     }
   };
 
+  const handleStartJourney = async () => {
+    if (!window.confirm('Start this journey now?')) return;
+    try {
+      const response = await startJourney(id);
+      if (response.success) {
+        setJourney(prev => ({ ...prev, status: 'active', isActive: true, startDate: new Date().toISOString() }));
+        toast.success("Journey started! Good luck! 🚀");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to start journey');
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-         <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950">
+         <div className="w-8 h-8 border-4 border-slate-900 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -195,7 +204,7 @@ const JourneyDetails = () => {
   if (!journey) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-100 dark:from-slate-950 dark:via-slate-900/50 dark:to-slate-950 p-4">
+    <div className="flex h-screen bg-white dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-50">
       {showConfetti && (
         <Confetti
           width={windowSize.width}
@@ -204,178 +213,166 @@ const JourneyDetails = () => {
           numberOfPieces={500}
         />
       )}
-      <div className="flex gap-4 h-[calc(100vh-2rem)]">
-        <Sidebar />
-        
-        <main className="flex-1 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-slate-700 overflow-hidden flex flex-col relative">
-          
-          {/* Header Banner */}
-          <div className="h-48 bg-gradient-to-r from-teal-600 via-emerald-600 to-cyan-600 relative shrink-0">
-            <button
-              onClick={() => navigate('/dashboard/journeys')}
-              className="absolute top-6 left-6 p-3 bg-white/20 backdrop-blur-md hover:bg-white/30 rounded-xl text-white transition-all flex items-center gap-2 font-medium"
-            >
-              <FiArrowLeft /> Back to Journeys
-            </button>
-            
-            <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/60 to-transparent">
-               <div className="flex justify-between items-end">
-                 <div>
-                   <h1 className="text-4xl font-bold text-white mb-2">{journey.title}</h1>
-                   <p className="text-white/90 text-lg max-w-2xl">{journey.description}</p>
-                 </div>
-                 <div className="flex gap-2">
-                   {/* Completion Controls */}
-                   {journey.status === 'active' && stats.progress === 100 && (
-                     <button
-                       onClick={handleCompleteJourney} 
-                       className="p-2 bg-yellow-400 text-yellow-900 rounded-lg hover:bg-yellow-300 transition-colors shadow-lg animate-bounce"
-                       title="Complete Journey"
-                     >
-                       <p className="text-sm font-bold px-3">🏆 Finish Journey</p>
-                     </button>
-                   )}
-                   
-                   {journey.status === 'completed' && (
-                     <button
-                       onClick={handleReactivateJourney} 
-                       className="p-2 bg-white/20 backdrop-blur-md rounded-lg text-white hover:bg-white/30 transition-colors"
-                     >
-                       <p className="text-sm font-medium px-2">Reactivate</p>
-                     </button>
-                   )}
+      
+      <Sidebar />
 
-                   <button 
-                     onClick={() => setIsRenameModalOpen(true)}
-                     className="p-2 bg-white/20 backdrop-blur-md rounded-lg text-white hover:bg-white/30 transition-colors"
-                   >
-                     <p className="text-sm font-medium px-2">Rename / Edit</p>
-                   </button>
-                 </div>
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white dark:bg-slate-950">
+        {/* Sticky Header */}
+        <header className="sticky top-0 z-10 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 px-8 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+               <button
+                  onClick={() => navigate('/dashboard/journeys')}
+                  className="p-2 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-lg transition-colors text-slate-500"
+               >
+                 <FiArrowLeft className="w-5 h-5" />
+               </button>
+               <div>
+                  <div className="flex items-center gap-3">
+                    <h1 className="text-xl font-semibold text-slate-900 dark:text-white">{journey.title}</h1>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
+                      journey.status === 'completed' ? 'bg-green-50 text-green-700 border-green-200' :
+                      journey.status === 'active' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                      'bg-yellow-50 text-yellow-700 border-yellow-200'
+                    }`}>
+                      {journey.status.charAt(0).toUpperCase() + journey.status.slice(1)}
+                    </span>
+                  </div>
                </div>
             </div>
-          </div>
 
-          <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-            <div className="max-w-5xl mx-auto space-y-8">
-              
-              {/* Stats Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                 <div className="p-4 bg-orange-50 dark:bg-orange-900/10 rounded-2xl border border-orange-100 dark:border-orange-900/20">
-                    <div className="flex items-center gap-2 mb-1 text-orange-600 dark:text-orange-400">
-                      <FiActivity /> <span className="text-sm font-bold uppercase">Current Streak</span>
-                    </div>
-                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.currentStreak}</p>
-                 </div>
-                 <div className="p-4 bg-purple-50 dark:bg-purple-900/10 rounded-2xl border border-purple-100 dark:border-purple-900/20">
-                    <div className="flex items-center gap-2 mb-1 text-purple-600 dark:text-purple-400">
-                      <FiTrendingUp /> <span className="text-sm font-bold uppercase">Best Streak</span>
-                    </div>
-                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.longestStreak}</p>
-                 </div>
-                 <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/20">
-                    <div className="flex items-center gap-2 mb-1 text-blue-600 dark:text-blue-400">
-                      <FiCalendar /> <span className="text-sm font-bold uppercase">Total Days</span>
-                    </div>
-                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalDays}</p>
-                 </div>
-                 <div className="p-4 bg-teal-50 dark:bg-teal-900/10 rounded-2xl border border-teal-100 dark:border-teal-900/20">
-                    <div className="flex items-center gap-2 mb-1 text-teal-600 dark:text-teal-400">
-                      <FiTarget /> <span className="text-sm font-bold uppercase">Progress</span>
-                    </div>
-                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.progress}%</p>
-                 </div>
-              </div>
-
-              {/* Tasks Section */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Main Task List */}
-                <div className="lg:col-span-2 space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                      <FiFileText className="text-teal-500" /> Tasks Log
-                    </h2>
-                  </div>
-                  
-                  {/* Add Task Input - Hide if completed */}
-                  {journey.status !== 'completed' && (
-                    <form onSubmit={handleCreateTask} className="relative">
-                      <textarea
-                        value={newTaskName}
-                        onChange={(e) => setNewTaskName(e.target.value)}
-                        placeholder="Log new tasks (one per line)..."
-                        rows={3}
-                        className="w-full pl-6 pr-14 py-4 bg-gray-50 dark:bg-slate-800 rounded-2xl border-2 border-transparent focus:border-teal-500 focus:outline-none transition-all text-gray-900 dark:text-slate-50 placeholder:text-gray-400 resize-none"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            handleCreateTask(e);
-                          }
-                        }}
-                      />
-                      <button 
-                        type="submit"
-                        disabled={!newTaskName.trim()}
-                        className="absolute right-2 top-2 p-2 bg-teal-600 text-white rounded-xl shadow-lg disabled:opacity-50 disabled:shadow-none transition-all hover:scale-105"
-                      >
-                        <FiPlus className="w-5 h-5" />
-                      </button>
-                    </form>
-                  )}
-
-                  {journey.status === 'completed' && (
-                    <div className="bg-teal-50 dark:bg-teal-900/20 p-6 rounded-2xl border border-teal-100 dark:border-teal-900/30 text-center">
-                      <p className="text-teal-800 dark:text-teal-200 font-medium text-lg">
-                        🎉 This journey is completed on {new Date(journey.completedAt).toLocaleDateString()}!
-                      </p>
-                      <p className="text-teal-600 dark:text-teal-400 mt-1">
-                        Reactivate it to make further changes.
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="space-y-3">
-                    {tasks.length > 0 ? (
-                      tasks.map(task => (
-                        <TaskItem 
-                          key={task._id} 
-                          task={task} 
-                          journeyStatus={journey.status}
-                          startDate={journey.startDate}
-                          onUpdate={handleUpdateTask} 
-                          onDelete={handleDeleteTask}
-                        />
-                      ))
-                    ) : (
-                      <div className="text-center py-12 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-slate-700">
-                        <p className="text-gray-500 dark:text-slate-400">No tasks logged yet. Start your journey today!</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Sidebar: Resources & Info */}
-                <div className="space-y-6">
-                   <div className="bg-gray-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-100 dark:border-slate-700">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                        <FiLink className="text-blue-500" /> Resources
-                      </h3>
-                      {/* Placeholder for resources List */}
-                      <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">
-                        Add links, images, or files to support your journey.
-                      </p>
-                      <button className="w-full py-2 bg-white dark:bg-slate-800 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl text-gray-500 hover:border-teal-500 hover:text-teal-500 transition-all flex items-center justify-center gap-2 text-sm font-medium">
-                        <FiPlus /> Add Resource
-                      </button>
-                   </div>
-                </div>
-              </div>
-
+            <div className="flex items-center gap-2">
+               {journey.status === 'active' && stats.progress === 100 && (
+                 <button onClick={handleCompleteJourney} className="btn-primary bg-slate-900 text-white hover:bg-slate-800 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                   Finish Journey
+                 </button>
+               )}
+               {journey.status === 'pending' && (
+                 <button onClick={handleStartJourney} className="btn-primary bg-slate-900 text-white hover:bg-slate-800 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                   Activate Now
+                 </button>
+               )}
+               {journey.status === 'completed' && (
+                 <button onClick={handleReactivateJourney} className="btn-secondary border border-slate-200 hover:bg-slate-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors text-slate-700 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-800">
+                   Reactivate
+                 </button>
+               )}
+               <button 
+                  onClick={() => setIsRenameModalOpen(true)}
+                  className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+               >
+                  <FiMoreHorizontal className="w-5 h-5" />
+               </button>
             </div>
-          </div>
-          
-        </main>
-      </div>
+        </header>
+
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
+           <div className="max-w-5xl mx-auto space-y-10">
+              
+              {/* Stats Overview */}
+              <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                 <div className="col-span-1 md:col-span-1 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center gap-5">
+                    <div className="w-16 h-16">
+                      <CircularProgressbar
+                        value={stats.progress}
+                        text={`${stats.progress}%`}
+                        styles={buildStyles({
+                          textSize: '24px',
+                          pathColor: '#0f172a', // Slate-900
+                          textColor: '#0f172a',
+                          trailColor: '#f1f5f9', // Slate-100
+                          pathTransitionDuration: 0.5,
+                        })}
+                      />
+                    </div>
+                    <div>
+                       <div className="text-sm text-slate-500 font-medium">Progress</div>
+                       <div className="text-sm text-slate-400">{stats.totalDays} days log</div>
+                    </div>
+                 </div>
+
+                 <div className="p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between">
+                    <div className="flex items-center gap-2 text-slate-400 text-sm font-medium">
+                       <FiActivity /> Current Streak
+                    </div>
+                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                       {stats.currentStreak} <span className="text-sm font-normal text-slate-400">days</span>
+                    </div>
+                 </div>
+
+                 <div className="p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between">
+                    <div className="flex items-center gap-2 text-slate-400 text-sm font-medium">
+                       <FiTrendingUp /> Best Streak
+                    </div>
+                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
+                       {stats.longestStreak} <span className="text-sm font-normal text-slate-400">days</span>
+                    </div>
+                 </div>
+
+                 <div className="p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between">
+                    <div className="flex items-center gap-2 text-slate-400 text-sm font-medium">
+                       <FiCalendar /> Started
+                    </div>
+                    <div className="text-lg font-semibold text-slate-900 dark:text-white">
+                       {new Date(journey.startDate).toLocaleDateString()}
+                    </div>
+                 </div>
+              </section>
+
+              {/* Task Board */}
+              <section className="space-y-6">
+                 <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Tasks</h2>
+                    <span className="text-sm text-slate-400">{tasks.length} entries</span>
+                 </div>
+
+                 {journey.status !== 'completed' && (
+                    <div className="relative">
+                       <input 
+                          type="text" 
+                          placeholder="Type a new task and press Enter..." 
+                          className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-slate-500 transition-all"
+                          value={newTaskName}
+                          onChange={(e) => setNewTaskName(e.target.value)}
+                          onKeyDown={(e) => {
+                             if (e.key === 'Enter') handleCreateTask(e);
+                          }}
+                       />
+                       <div className="absolute right-3 top-3 text-xs text-slate-400 border border-slate-200 rounded px-1.5 py-0.5">Enter</div>
+                    </div>
+                 )}
+
+                 {journey.status === 'completed' && (
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 text-center text-sm text-slate-600">
+                       Journey completed. <button onClick={handleReactivateJourney} className="text-slate-900 font-medium underline">Reactivate</button> to add tasks.
+                    </div>
+                 )}
+
+                 <div className="space-y-1">
+                    <AnimatePresence initial={false}>
+                       {tasks.map(task => (
+                          <TaskItem 
+                            key={task._id} 
+                            task={task} 
+                            journeyStatus={journey.status}
+                            startDate={journey.startDate}
+                            onUpdate={handleUpdateTask} 
+                            onDelete={handleDeleteTask}
+                            minimal={true}
+                          />
+                       ))}
+                    </AnimatePresence>
+                    {tasks.length === 0 && (
+                       <div className="py-12 text-center text-slate-400 text-sm">
+                          No tasks yet.
+                       </div>
+                    )}
+                 </div>
+              </section>
+
+           </div>
+        </div>
+      </main>
 
       <RenameJourneyModal
         isOpen={isRenameModalOpen}
@@ -386,22 +383,6 @@ const JourneyDetails = () => {
         }}
         journey={journey}
       />
-      
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(148, 163, 184, 0.3);
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(148, 163, 184, 0.5);
-        }
-      `}</style>
     </div>
   );
 };

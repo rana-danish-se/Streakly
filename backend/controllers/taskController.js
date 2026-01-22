@@ -132,7 +132,8 @@ export const createBulkTasks = async (req, res) => {
         journeyStats: {
           currentStreak: journey.currentStreak,
           longestStreak: journey.longestStreak,
-          totalDays: journey.totalDays
+          totalDays: journey.totalDays,
+          progress: journey.progress
         }
       }
     });
@@ -173,7 +174,7 @@ export const getJourneyTasks = async (req, res) => {
     }
 
     const tasks = await Task.find({ journey: journeyId })
-      .sort({ createdAt: -1 })
+      .sort({ completed: 1, completedAt: -1, createdAt: -1 })
       .limit(parseInt(limit));
 
     res.status(200).json({
@@ -369,6 +370,7 @@ export const deleteTask = async (req, res) => {
       journey.currentStreak = stats.currentStreak;
       journey.longestStreak = stats.longestStreak;
       journey.totalDays = stats.totalDays;
+      journey.progress = stats.progress;
       await journey.save();
       
       return res.status(200).json({
@@ -379,7 +381,7 @@ export const deleteTask = async (req, res) => {
                 currentStreak: journey.currentStreak,
                 longestStreak: journey.longestStreak,
                 totalDays: journey.totalDays,
-                progress: journey.progressPercentage
+                progress: journey.progress
             }
         }
       });

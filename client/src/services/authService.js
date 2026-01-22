@@ -52,6 +52,13 @@ export const authAPI = {
     const response = await api.put(`/auth/reset-password/${token}`, { password });
     return response.data;
   },
+
+  // Google OAuth authentication
+  googleAuth: async (idToken) => {
+    const response = await api.post('/auth/google', { idToken });
+    // Backend returns { success: true, data: { user: {...}, token: '...' } }
+    return response.data.data || response.data;
+  },
 };
 
 export default authAPI;

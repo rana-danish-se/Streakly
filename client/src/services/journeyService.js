@@ -161,6 +161,16 @@ export const deleteTask = async (taskId) => {
   return response.data;
 };
 
+/**
+ * Start a pending journey immediately
+ * @param {string} id - Journey ID
+ * @returns {Promise} Update response
+ */
+export const startJourney = async (id) => {
+  const response = await api.post(`/journeys/${id}/start`);
+  return response.data;
+};
+
 export default {
   createJourney,
   getJourneys,
@@ -170,6 +180,7 @@ export default {
   completeJourney,
   addResource,
   deleteResource,
+  startJourney,
   createTask,
   createBulkTasks,
   updateTask,

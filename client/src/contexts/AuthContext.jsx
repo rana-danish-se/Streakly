@@ -96,6 +96,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const googleLogin = async (idToken) => {
+    try {
+      setError(null);
+      const data = await authAPI.googleAuth(idToken);
+      // The backend returns { success: true, user: {...}, token: '...' }
+      if (data.user) {
+        setUser(data.user);
+      } else if (data.data && data.data.user) {
+        setUser(data.data.user);
+      }
+      return { success: true, data };
+    } catch (err) {
+      setError(err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -105,6 +122,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateProfile,
     changePassword,
+    googleLogin,
     checkAuth,
   };
 

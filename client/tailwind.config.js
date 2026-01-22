@@ -7,6 +7,11 @@ export default {
   darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        heading: ['Manrope', 'sans-serif'],
+        numbers: ['Space Grotesk', 'sans-serif'],
+      },
       colors: {
         // Custom color palette for Streakly
         primary: {

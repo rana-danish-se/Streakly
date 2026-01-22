@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import { generateToken, setTokenCookie, clearTokenCookie } from '../utils/jwtUtils.js';
 import bcrypt from 'bcrypt';
+import { OAuth2Client } from 'google-auth-library';
 
 // @desc    Register new user
 // @route   POST /api/auth/register
@@ -390,3 +391,132 @@ export const updateProfile = async (req, res) => {
     });
   }
 };
+
+// @desc    Google OAuth authentication
+// @route   POST /api/auth/google
+// @access  Public
+export const googleAuth = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+
+    // Validation
+    if (!idToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide Google ID token'
+      });
+    }
+
+    // Initialize Google OAuth client
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+    // Verify Google ID token
+    let ticket;
+    try {
+      ticket = await client.verifyIdToken({
+        idToken,
+        audience: process.env.GOOGLE_CLIENT_ID
+      });
+    } catch (error) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid Google ID token',
+        error: error.message
+      });
+    }
+
+    // Extract user information from verified token
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    // Check if user exists by Google ID
+    let user = await User.findOne({ googleId });
+
+    if (user) {
+      // User exists with this Google ID - login
+      const token = generateToken(user._id);
+      setTokenCookie(res, token);
+
+      return res.status(200).json({
+        success: true,
+        message: 'Login successful',
+        data: {
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            profilePicture: user.profilePicture,
+            authProvider: user.authProvider,
+            createdAt: user.createdAt
+          },
+          token
+        }
+      });
+    }
+
+    // Check if user exists with this email (account merging scenario)
+    user = await User.findOne({ email });
+
+    if (user) {
+      // User exists with this email - merge accounts
+      user.googleId = googleId;
+      user.authProvider = 'google';
+      user.profilePicture = picture || user.profilePicture;
+      await user.save();
+
+      const token = generateToken(user._id);
+      setTokenCookie(res, token);
+
+      return res.status(200).json({
+        success: true,
+        message: 'Account linked with Google successfully',
+        data: {
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            profilePicture: user.profilePicture,
+            authProvider: user.authProvider,
+            createdAt: user.createdAt
+          },
+          token
+        }
+      });
+    }
+
+    // New user - create account
+    user = await User.create({
+      name,
+      email,
+      googleId,
+      authProvider: 'google',
+      profilePicture: picture
+    });
+
+    const token = generateToken(user._id);
+    setTokenCookie(res, token);
+
+    res.status(201).json({
+      success: true,
+      message: 'User registered successfully with Google',
+      data: {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          profilePicture: user.profilePicture,
+          authProvider: user.authProvider,
+          createdAt: user.createdAt
+        },
+        token
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error authenticating with Google',
+      error: error.message
+    });
+  }
+};
+

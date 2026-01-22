@@ -44,24 +44,22 @@ const TaskItem = ({ task, journeyStatus, startDate, onUpdate, onDelete }) => {
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      className={`group relative flex items-center gap-4 p-4 rounded-2xl border transition-all ${
-        task.completed 
-          ? 'bg-gray-50/50 dark:bg-slate-800/30 border-gray-100 dark:border-slate-800' 
-          : 'bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700 shadow-sm hover:shadow-md'
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className={`group flex items-center gap-3 p-3 rounded-lg border border-transparent hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors ${
+        task.completed ? 'opacity-50' : ''
       }`}
     >
       {/* Checkbox */}
       <button
         onClick={handleToggleComplete}
         disabled={isLoading}
-        className={`flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center border-2 transition-all ${
+        className={`flex-shrink-0 w-5 h-5 rounded border flex items-center justify-center transition-all ${
           task.completed
-            ? 'bg-teal-500 border-teal-500 text-white'
-            : 'bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-600 hover:border-teal-400 dark:hover:border-teal-400'
-        } ${isLoading ? 'opacity-80 cursor-wait' : ''}`}
+            ? 'bg-slate-900 border-slate-900 text-white'
+            : 'bg-white border-slate-300 hover:border-slate-900'
+        }`}
       >
         <AnimatePresence mode="wait">
           {isLoading ? (

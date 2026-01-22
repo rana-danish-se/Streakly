@@ -123,7 +123,7 @@ export const getJourney = async (req, res) => {
 
     // Get tasks for this journey to show in detail view
     const tasks = await Task.find({ journey: journey._id })
-      .sort({ createdAt: -1 })
+      .sort({ completed: 1, completedAt: -1, createdAt: -1 })
       .limit(50);
 
     res.status(200).json({
@@ -438,6 +438,56 @@ export const deleteResource = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+/**
+ * @desc    Start a pending journey immediately
+ * @route   POST /api/journeys/:id/start
+ * @access  Private
+ */
+export const startJourney = async (req, res) => {
+  try {
+    const journey = await Journey.findById(req.params.id);
+
+    if (!journey) {
+      return res.status(404).json({
+        success: false,
+        message: 'Journey not found'
+      });
+    }
+
+    if (journey.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to update this journey'
+      });
+    }
+
+    if (journey.status !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: `Journey is already ${journey.status}`
+      });
+    }
+
+    // Update start date to now and status to active
+    journey.startDate = new Date();
+    journey.status = 'active';
+    journey.isActive = true;
+    
+    await journey.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Journey started successfully',
+      data: journey
+    });
+  } catch (error) {
+    res.status(400).json({
       success: false,
       message: error.message
     });

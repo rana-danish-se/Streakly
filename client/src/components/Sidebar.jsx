@@ -18,7 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import ThemeToggle from './ThemeToggle';
 import JourneyModal from './JourneyModal';
-import logo from '../assets/logo.png';
+import darkLogo from '../assets/darkLogo.png';
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -103,7 +103,7 @@ const Sidebar = () => {
                 transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
               />
               {isExpanded ? (
-                <img src={logo} alt="Streakly" className="w-8 h-8 relative z-10" />
+                <img src={darkLogo} alt="Streakly" className="w-8 h-8 relative z-10" />
               ) : (
                 <span className="text-2xl font-bold text-white relative z-10">S</span>
               )}

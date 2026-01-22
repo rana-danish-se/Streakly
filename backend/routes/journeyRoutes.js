@@ -8,7 +8,8 @@ import {
   completeJourney,
   reactivateJourney,
   addResource,
-  deleteResource
+  deleteResource,
+  startJourney
 } from '../controllers/journeyController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { uploadFile } from '../middleware/uploadMiddleware.js';
@@ -31,6 +32,7 @@ router.route('/:id')
 // Journey completion
 router.post('/:id/complete', completeJourney);     // POST /api/journeys/:id/complete
 router.post('/:id/reactivate', reactivateJourney); // POST /api/journeys/:id/reactivate
+router.post('/:id/start', startJourney);           // POST /api/journeys/:id/start
 
 // Resource management
 router.route('/:id/resources')

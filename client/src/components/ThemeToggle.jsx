@@ -14,9 +14,9 @@ const ThemeToggle = ({ variant = 'circle', showLabel = false }) => {
         isCircle 
           ? 'w-14 h-14 rounded-full' 
           : 'w-full px-4 py-3 rounded-xl'
-      } bg-gray-200 dark:bg-gray-700 flex items-center ${
+      } bg-gray-200 dark:bg-gray-800 flex items-center ${
         isCircle ? 'justify-center' : 'gap-3'
-      } hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors`}
+      } hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors`}
       whileHover={{ scale: isCircle ? 1.05 : 1.02, x: !isCircle ? 5 : 0 }}
       whileTap={{ scale: 0.95 }}
       aria-label="Toggle theme"
@@ -29,9 +29,9 @@ const ThemeToggle = ({ variant = 'circle', showLabel = false }) => {
         className="flex-shrink-0"
       >
         {theme === 'dark' ? (
-          <FiMoon className="w-5 h-5 text-blue-400" />
+          <FiMoon className="w-5 h-5 text-[var(--primary)]" />
         ) : (
-          <FiSun className="w-5 h-5 text-orange-500" />
+          <FiSun className="w-5 h-5 text-[var(--warning)]" />
         )}
       </motion.div>
       <AnimatePresence>
@@ -40,7 +40,7 @@ const ThemeToggle = ({ variant = 'circle', showLabel = false }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="font-medium flex-1 text-left text-gray-700 dark:text-gray-300"
+            className="font-medium flex-1 text-left text-[var(--text)]"
           >
             {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
           </motion.span>
