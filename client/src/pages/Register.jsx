@@ -240,12 +240,6 @@ const Register = () => {
                   borderColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
                   color: 'var(--text)'
                 }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)';
-                }}
               />
               {formData.email && formData.email.includes('@') && (
                 <div className="absolute right-4 top-1/2 -translate-y-1/2">

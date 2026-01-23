@@ -17,9 +17,12 @@ export const NotificationProvider = ({ children }) => {
     try {
       const currentPermission = pushService.getPermission();
       setPermission(currentPermission);
+      
       if (currentPermission === 'granted') {
         const subscription = await pushService.getSubscription();
         setIsSubscribed(!!subscription);
+      } else {
+        setIsSubscribed(false);
       }
     } catch (err) {
       console.error('Failed to check notification status:', err);

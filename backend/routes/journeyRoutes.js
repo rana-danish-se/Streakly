@@ -9,7 +9,8 @@ import {
   reactivateJourney,
   addResource,
   deleteResource,
-  startJourney
+  startJourney,
+  getJourneyStats
 } from '../controllers/journeyController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { uploadFile } from '../middleware/uploadMiddleware.js';
@@ -20,6 +21,8 @@ const router = express.Router();
 router.use(protect);
 
 // Journey CRUD routes
+router.get('/stats', getJourneyStats); // GET /api/journeys/stats (must be before /:id)
+
 router.route('/')
   .get(getJourneys)      // GET /api/journeys
   .post(createJourney);  // POST /api/journeys

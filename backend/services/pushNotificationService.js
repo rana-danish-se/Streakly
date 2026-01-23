@@ -85,9 +85,26 @@ class PushNotificationService {
       badge: '/icons/badge.png',
       tag: `journey-reminder-${journey._id}`,
       data: {
-        url: `/journeys/${journey._id}`,
+        url: `/dashboard/journey/${journey._id}`,
         journeyId: journey._id,
         type: 'journey-reminder'
+      }
+    };
+  }
+
+  createJourneyScheduledPayload(journey, startDate) {
+    const daysUntilStart = Math.ceil((new Date(startDate) - new Date()) / (1000 * 60 * 60 * 24));
+    
+    return {
+      title: '✅ Journey Scheduled!',
+      body: `"${journey.title}" is set to start in ${daysUntilStart} days. We'll remind you 24 hours and 1 hour before it begins.`,
+      icon: '/icons/journey-scheduled.png',
+      badge: '/icons/badge.png',
+      tag: `journey-scheduled-${journey._id}`,
+      data: {
+        url: `/dashboard/journey/${journey._id}`,
+        journeyId: journey._id,
+        type: 'journey-scheduled'
       }
     };
   }

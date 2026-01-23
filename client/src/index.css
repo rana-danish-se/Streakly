@@ -65,3 +65,265 @@
     @apply rounded-lg shadow-md p-6 transition-colors;
   }
 }
+
+/* ============================================
+   CUSTOM SCROLLBAR STYLES - THEME AWARE
+   Add this to your main CSS file (e.g., index.css or App.css)
+   ============================================ */
+
+/* ===== WEBKIT BROWSERS (Chrome, Safari, Edge) ===== */
+
+/* Scrollbar Track */
+::-webkit-scrollbar {
+  width: 12px; /* Width of vertical scrollbar */
+  height: 12px; /* Height of horizontal scrollbar */
+}
+
+/* Scrollbar Track Background */
+::-webkit-scrollbar-track {
+  background: var(--bg);
+  border-radius: 10px;
+}
+
+/* Scrollbar Thumb (the draggable part) */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--primary) 0%, var(--success) 100%);
+  border-radius: 10px;
+  border: 2px solid var(--bg);
+  transition: all 0.3s ease;
+}
+
+/* Scrollbar Thumb on Hover */
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--success) 0%, var(--primary) 100%);
+  border: 2px solid var(--primary);
+  cursor: pointer;
+}
+
+/* Scrollbar Thumb when Active/Pressed */
+::-webkit-scrollbar-thumb:active {
+  background: var(--primary);
+}
+
+/* Scrollbar Corner (where vertical and horizontal scrollbars meet) */
+::-webkit-scrollbar-corner {
+  background: var(--bg);
+}
+
+
+/* ===== FIREFOX ===== */
+
+* {
+  scrollbar-width: thin; /* "auto" | "thin" | "none" */
+  scrollbar-color: var(--primary) var(--bg); /* thumb color | track color */
+}
+
+
+/* ===== LIGHT THEME SPECIFIC ADJUSTMENTS ===== */
+
+:root:not(.dark) ::-webkit-scrollbar-track {
+  background: #F1F5F9; /* Lighter track for light theme */
+}
+
+:root:not(.dark) ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #6366F1 0%, #22C55E 100%);
+  border: 2px solid #F8FAFC;
+}
+
+:root:not(.dark) ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #4F46E5 0%, #16A34A 100%);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+
+/* ===== DARK THEME SPECIFIC ADJUSTMENTS ===== */
+
+.dark ::-webkit-scrollbar-track {
+  background: #0F172A; /* Darker track for dark theme */
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #818CF8 0%, #4ADE80 100%);
+  border: 2px solid #020617;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #6366F1 0%, #22C55E 100%);
+  box-shadow: 0 0 15px rgba(129, 140, 248, 0.4);
+}
+
+
+/* ===== THIN SCROLLBAR VARIANT (Optional) ===== */
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  border: 1px solid var(--bg);
+}
+
+
+/* ===== INVISIBLE SCROLLBAR (But Still Functional) ===== */
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none; /* Hide scrollbar */
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+
+/* ===== CUSTOM SCROLLBAR FOR SPECIFIC CONTAINERS ===== */
+
+/* For Modal/Dialog Scrollbars */
+.modal-content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 10px;
+  opacity: 0.8;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  opacity: 1;
+}
+
+
+/* For Sidebar Scrollbars */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 10px;
+  opacity: 0.5;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  opacity: 1;
+}
+
+
+/* ===== ANIMATED SCROLLBAR (Advanced) ===== */
+
+@keyframes scrollbar-pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.scrollbar-animated::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--primary) 0%, var(--success) 100%);
+  animation: scrollbar-pulse 2s ease-in-out infinite;
+}
+
+
+/* ===== SMOOTH SCROLL BEHAVIOR ===== */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Disable smooth scroll for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+
+/* ===== UTILITY CLASSES ===== */
+
+/* Apply these classes to specific elements for custom scrollbars */
+
+/* Primary colored scrollbar */
+.scrollbar-primary::-webkit-scrollbar-thumb {
+  background: var(--primary);
+}
+
+/* Success colored scrollbar */
+.scrollbar-success::-webkit-scrollbar-thumb {
+  background: var(--success);
+}
+
+/* Warning colored scrollbar */
+.scrollbar-warning::-webkit-scrollbar-thumb {
+  background: var(--warning);
+}
+
+/* Danger colored scrollbar */
+.scrollbar-danger::-webkit-scrollbar-thumb {
+  background: var(--danger);
+}
+
+
+/* ===== HOVER GLOW EFFECT ===== */
+
+::-webkit-scrollbar-thumb:hover {
+  box-shadow: 
+    0 0 10px var(--primary),
+    0 0 20px var(--primary),
+    inset 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+
+/* ===== ROUNDED EDGES FOR TRACK ===== */
+
+::-webkit-scrollbar-track {
+  margin: 10px 0; /* Creates space at top and bottom */
+}
+
+
+/* ===== BETTER VISIBILITY ON LIGHT BACKGROUNDS ===== */
+
+.light-bg::-webkit-scrollbar-thumb {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+
+/* ===== GRADIENT TRACK (Alternative Style) ===== */
+
+.scrollbar-gradient-track::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, 
+    rgba(99, 102, 241, 0.1) 0%, 
+    rgba(34, 197, 94, 0.1) 100%
+  );
+}
+
+
+/* ===== MOBILE OPTIMIZATION ===== */
+
+/* Hide scrollbar on mobile but keep functionality */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    border: none;
+  }
+}
+
+
+/* ===== PRINT STYLES ===== */
+
+@media print {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { FiStar } from 'react-icons/fi';
+import { HiLightningBolt } from 'react-icons/hi';
+import { useTheme } from '../contexts/ThemeContext';
 
 const QuoteOfTheDay = () => {
+  const { theme } = useTheme();
   const [quote, setQuote] = useState({ text: "Loading quote...", author: "" });
   const [loading, setLoading] = useState(true);
 
@@ -9,7 +13,7 @@ const QuoteOfTheDay = () => {
     const fetchQuote = async () => {
       try {
         // Using a CORS proxy to avoid CORS issues with ZenQuotes API in the browser
-        const response = await fetch('https://api.allorigins.win/raw?url=https://zenquotes.io/api/today');
+        const response = await fetch('https://api.allorigins.win/raw?url=https://zenquotes.io/api/random');
         const data = await response.json();
         if (data && data[0]) {
           setQuote({ text: data[0].q, author: data[0].a });
@@ -29,35 +33,69 @@ const QuoteOfTheDay = () => {
   }, []);
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-teal-500 to-emerald-500 p-8 text-white shadow-xl">
-      <div className="absolute top-0 right-0 -mr-8 -mt-8 h-32 w-32 rounded-full bg-white/10 blur-3xl" />
-      <div className="absolute bottom-0 left-0 -ml-8 -mb-8 h-32 w-32 rounded-full bg-black/10 blur-3xl" />
-      
-      <div className="relative z-10 flex flex-col items-center text-center">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="relative rounded-2xl p-8 overflow-hidden"
+      style={{ 
+        backgroundColor: 'var(--card)',
+        border: '2px solid',
+        borderColor: 'var(--primary)'
+      }}
+    >
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-32 h-32 opacity-5">
         <motion.div
-          key={quote.text}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="max-w-2xl"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         >
-          {loading ? (
-             <div className="h-20 flex items-center justify-center">
-               <div className="w-6 h-6 border-2 border-white/50 border-t-white rounded-full animate-spin" />
-             </div>
-          ) : (
-            <>
-              <h2 className="mb-6 font-serif text-2xl font-light italic leading-relaxed md:text-3xl">
-                "{quote.text}"
-              </h2>
-              <p className="text-sm font-semibold tracking-wider text-teal-100 opacity-80">
-                — {quote.author}
-              </p>
-            </>
-          )}
+          <HiLightningBolt className="w-full h-full" style={{ color: 'var(--primary)' }} />
         </motion.div>
       </div>
-    </div>
+
+      <div className="relative z-10">
+        <div className="flex items-center gap-2 mb-4">
+          <FiStar style={{ color: 'var(--warning)' }} className="w-5 h-5" />
+          <span 
+            className="text-sm font-semibold"
+            style={{ color: 'var(--primary)' }}
+          >
+            Daily Motivation
+          </span>
+        </div>
+        
+        {loading ? (
+          <div className="h-32 flex items-center justify-center">
+            <div 
+              className="w-8 h-8 border-2 rounded-full animate-spin"
+              style={{ 
+                borderColor: 'var(--primary)',
+                borderTopColor: 'transparent'
+              }}
+            />
+          </div>
+        ) : (
+          <>
+            <motion.blockquote
+              key={quote.text}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-2xl font-medium mb-4 leading-relaxed"
+              style={{ color: 'var(--text)' }}
+            >
+              "{quote.text}"
+            </motion.blockquote>
+            
+            <cite 
+              className="not-italic text-lg opacity-70"
+              style={{ color: 'var(--text)' }}
+            >
+              — {quote.author}
+            </cite>
+          </>
+        )}
+      </div>
+    </motion.div>
   );
 };
 

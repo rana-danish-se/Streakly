@@ -28,17 +28,26 @@ export const createJourney = async (req, res) => {
       status
     });
 
-    // If journey starts immediately, send notification now
-    if (status === 'active') {
-      try {
-        const payload = pushService.createJourneyStartPayload(journey);
-        await pushService.sendToUser(req.user._id, payload);
+    // Send appropriate notification based on status
+    try {
+      let payload;
+      if (status === 'active') {
+        // Journey starts immediately
+        payload = pushService.createJourneyStartPayload(journey);
+      } else {
+        // Journey is scheduled for future
+        payload = pushService.createJourneyScheduledPayload(journey, parsedStartDate);
+      }
+      
+      await pushService.sendToUser(req.user._id, payload);
+      
+      if (status === 'active') {
         journey.notificationSent = true;
         await journey.save();
-      } catch (error) {
-        console.error('Failed to send immediate notification:', error);
-        // Don't fail journey creation if notification fails
       }
+    } catch (error) {
+      console.error('Failed to send journey creation notification:', error);
+      // Don't fail journey creation if notification fails
     }
 
     res.status(201).json({
@@ -47,7 +56,7 @@ export const createJourney = async (req, res) => {
       data: {
         journey,
         status: status === 'pending' 
-          ? 'Journey scheduled - you will receive notifications before it starts'
+          ? `Journey scheduled to start on ${parsedStartDate.toLocaleDateString()}. You'll receive reminders!`
           : 'Journey started - notification sent'
       }
     });
@@ -493,3 +502,47 @@ export const startJourney = async (req, res) => {
     });
   }
 };
+
+/**
+ * @desc    Get journey statistics for user
+ * @route   GET /api/journeys/stats
+ * @access  Private
+ */
+export const getJourneyStats = async (req, res) => {
+  try {
+    const journeys = await Journey.find({ user: req.user._id });
+    const tasks = await Task.find({ 
+      journey: { $in: journeys.map(j => j._id) } 
+    });
+
+    // Calculate statistics
+    const totalJourneys = journeys.length;
+    const activeJourneys = journeys.filter(j => j.status === 'active' && j.progress < 100).length;
+    const completedJourneys = journeys.filter(j => j.progress === 100 || j.status === 'completed').length;
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(t => t.completed).length;
+    const longestStreak = Math.max(...journeys.map(j => j.bestStreak || 0), 0);
+    const averageProgress = journeys.length > 0 
+      ? journeys.reduce((sum, j) => sum + (j.progress || 0), 0) / journeys.length 
+      : 0;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalJourneys,
+        activeJourneys,
+        completedJourneys,
+        totalTasks,
+        completedTasks,
+        longestStreak,
+        averageProgress: Math.round(averageProgress)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
