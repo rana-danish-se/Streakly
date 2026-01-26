@@ -1,12 +1,12 @@
-import express from 'express';
-import { triggerJourneyCheck, triggerStreakReminder } from '../controllers/cronController.js';
+import { triggerJourneyCheck, triggerStreakReminder, triggerDailyRun } from '../controllers/cronController.js';
 
 const router = express.Router();
 
-// Route for checking journey starts and reminders (15-min interval recommended)
-router.get('/journey-check', triggerJourneyCheck);
+// Single daily route for Vercel Hobby Plan
+router.get('/daily-run', triggerDailyRun);
 
-// Route for daily streak reminders (Daily at 10pm recommended)
+// Individual routes (keep for manual triggering if needed)
+router.get('/journey-check', triggerJourneyCheck);
 router.get('/streak-reminder', triggerStreakReminder);
 
 export default router;
