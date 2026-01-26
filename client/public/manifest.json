@@ -1,7 +1,7 @@
 {
-  "name": "Journey Tracker - Never Miss Your Goals",
-  "short_name": "Journeys",
-  "description": "Track your personal journeys and receive smart notifications to stay on track with your goals",
+  "name": "Streakly - Track Your Learning Journey",
+  "short_name": "Streakly",
+  "description": "Track your learning journeys, build consistent habits, and achieve your goals with smart notifications and progress tracking",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
