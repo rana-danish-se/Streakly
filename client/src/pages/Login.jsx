@@ -9,7 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import darkLogo from '../assets/darkLogo.png';
 import lightLogo from '../assets/lightLogo.png';
 import { useTheme } from '../contexts/ThemeContext';
-import {motion} from 'framer-motion'
+import { motion } from 'framer-motion';
 const Login = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
@@ -293,7 +293,6 @@ const Login = () => {
               onError={handleGoogleError}
               theme="outline"
               size="large"
-              width="100%"
               text="signin_with"
               shape="rectangular"
             />
