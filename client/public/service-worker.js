@@ -130,6 +130,11 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
+  // Skip API requests - let the browser handle them directly
+  if (event.request.url.includes('/api/')) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then(function(response) {
       // Return cached version or fetch from network
