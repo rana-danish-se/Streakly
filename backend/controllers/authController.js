@@ -57,7 +57,7 @@ export const register = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error registering user',
-      error: error.message
+      error: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred'
     });
   }
 };
@@ -120,7 +120,7 @@ export const login = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error logging in',
-      error: error.message
+      error: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred'
     });
   }
 };
@@ -201,15 +201,19 @@ export const forgotPassword = async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     // In production, you would send this token via email
-    // For now, we'll return it in the response (NOT RECOMMENDED FOR PRODUCTION)
+    // For now, we'll return it in the response only in DEVELOPMENT
+    const responseData = {
+      message: 'If a user with that email exists, a password reset link has been sent.'
+    };
+
+    if (process.env.NODE_ENV === 'development') {
+      responseData.resetToken = resetToken;
+    }
+
     res.status(200).json({
       success: true,
-      message: 'Password reset token generated. In production, this would be sent via email.',
-      data: {
-        resetToken, // REMOVE THIS IN PRODUCTION
-        // In production, only send a success message
-        message: 'If a user with that email exists, a password reset link has been sent.'
-      }
+      message: 'Password reset token generated.',
+      data: responseData
     });
   } catch (error) {
     res.status(500).json({

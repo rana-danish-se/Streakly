@@ -22,7 +22,7 @@ const taskSchema = new mongoose.Schema({
   },
   completed: {
     type: Boolean,
-    default: true
+    default: false
   },
   completedAt:{
     type: Date,

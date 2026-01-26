@@ -45,7 +45,7 @@ router.post('/subscribe', protect, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message
+      message: process.env.NODE_ENV === 'development' ? error.message : 'Error processing subscription'
     });
   }
 });
@@ -67,7 +67,7 @@ router.post('/unsubscribe', protect, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message
+      message: process.env.NODE_ENV === 'development' ? error.message : 'Error unsubscribing'
     });
   }
 });
@@ -87,7 +87,7 @@ router.get('/my-subscriptions', protect, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message
+      message: process.env.NODE_ENV === 'development' ? error.message : 'Error fetching subscriptions'
     });
   }
 });

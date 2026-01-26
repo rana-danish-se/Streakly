@@ -28,7 +28,7 @@ router.post('/image', protect, uploadImage.single('file'), (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error uploading image',
-      error: error.message
+      error: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred'
     });
   }
 });
@@ -57,7 +57,7 @@ router.post('/document', protect, uploadDocument.single('file'), (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error uploading document',
-      error: error.message
+      error: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred'
     });
   }
 });
@@ -88,7 +88,7 @@ router.post('/multiple', protect, uploadFile.array('files', 10), (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error uploading files',
-      error: error.message
+      error: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred'
     });
   }
 });

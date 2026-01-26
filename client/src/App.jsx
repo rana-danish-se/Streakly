@@ -27,6 +27,7 @@ function AnimatedRoutes() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/journeys" element={<Journeys />} />
         <Route path="/dashboard/journeys/:id" element={<JourneyDetails />} />
+        <Route path="/dashboard/journey/:id" element={<JourneyDetails />} />
       </Routes>
     </AnimatePresence>
   );

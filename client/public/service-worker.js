@@ -1,5 +1,6 @@
 // public/service-worker.js
 // IMPORTANT: This file must be at the root of the public folder
+/* eslint-disable no-undef */
 
 // Service worker version - increment to force update
 const CACHE_VERSION = 'v1';
@@ -40,6 +41,8 @@ self.addEventListener('push', function(event) {
   // Show the notification
   event.waitUntil(
     self.registration.showNotification(notificationData.title, options)
+      .then(() => console.log('[Service Worker] Notification shown successfully'))
+      .catch(err => console.error('[Service Worker] Failed to show notification:', err))
   );
 });
 

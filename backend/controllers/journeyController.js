@@ -63,7 +63,7 @@ export const createJourney = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message
+      message: process.env.NODE_ENV === 'development' ? error.message : 'Invalid request data'
     });
   }
 };
@@ -100,7 +100,7 @@ export const getJourneys = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message
+      message: process.env.NODE_ENV === 'development' ? error.message : 'Error fetching journeys'
     });
   }
 };
@@ -145,7 +145,7 @@ export const getJourney = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred'
     });
   }
 };
@@ -190,7 +190,7 @@ export const updateJourney = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message
+      message: process.env.NODE_ENV === 'development' ? error.message : 'Error updating journey'
     });
   }
 };
@@ -487,8 +487,18 @@ export const startJourney = async (req, res) => {
     journey.startDate = new Date();
     journey.status = 'active';
     journey.isActive = true;
+    journey.notificationSent = true;
     
     await journey.save();
+
+    // Send push notification
+    try {
+      const payload = pushService.createJourneyStartPayload(journey);
+      await pushService.sendToUser(req.user._id, payload);
+    } catch (error) {
+       console.error('Failed to send journey start notification:', error);
+       // continue without failing request
+    }
 
     res.status(200).json({
       success: true,

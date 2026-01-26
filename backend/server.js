@@ -8,7 +8,7 @@ import authRoutes from './routes/authRoutes.js';
 import journeyRoutes from './routes/journeyRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
 import pushSubscriptionRoutes from './routes/pushSubscription.js';
-import initStreakReminder from './jobs/streakReminder.js';
+import cronRoutes from './routes/cronRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -41,6 +41,7 @@ app.use('/api/journeys', journeyRoutes);
 app.use('/api/journeys/:journeyId/tasks', taskRoutes); // Nested task routes
 app.use('/api/tasks', taskRoutes); // Top-level task routes
 app.use('/api/push', pushSubscriptionRoutes);
+app.use('/api/cron', cronRoutes);
 
 
 
@@ -85,7 +86,4 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🌐 Client URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}`);
-  
-  // Initialize Cron Jobs
-  initStreakReminder();
 });

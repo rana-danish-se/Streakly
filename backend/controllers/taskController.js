@@ -64,7 +64,7 @@ export const createTask = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message
+      message: process.env.NODE_ENV === 'development' ? error.message : 'Error creating task'
     });
   }
 // ... existing code ...
@@ -140,7 +140,7 @@ export const createBulkTasks = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message
+      message: process.env.NODE_ENV === 'development' ? error.message : 'Error creating bulk tasks'
     });
   }
 };
@@ -185,7 +185,7 @@ export const getJourneyTasks = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: process.env.NODE_ENV === 'development' ? error.message : 'Error fetching tasks'
     });
   }
 };
@@ -221,7 +221,7 @@ export const getTask = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: process.env.NODE_ENV === 'development' ? error.message : 'Error fetching task'
     });
   }
 };

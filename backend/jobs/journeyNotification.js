@@ -1,32 +1,8 @@
-import cron from "node-cron";
 import Journey from "../models/Journey.js";
 import pushService from "../services/pushNotificationService.js";
 
 class JourneyNotificationJobs {
   
-  // Run every 15 minutes to check for journey events
-  startJobs() {
-    // Check for journeys starting now
-    cron.schedule('*/15 * * * *', async () => {
-      console.log('Running journey start check...');
-      await this.checkJourneyStarts();
-    });
-
-    // Check for 24-hour reminders (runs every hour)
-    cron.schedule('0 * * * *', async () => {
-      console.log('Running 24-hour reminder check...');
-      await this.check24HourReminders();
-    });
-
-    // Check for 1-hour reminders (runs every 15 minutes)
-    cron.schedule('*/15 * * * *', async () => {
-      console.log('Running 1-hour reminder check...');
-      await this.check1HourReminders();
-    });
-
-    console.log('Journey notification cron jobs started');
-  }
-
   // Check for journeys that should start now
   async checkJourneyStarts() {
     try {
@@ -35,7 +11,7 @@ class JourneyNotificationJobs {
       // Find journeys that:
       // - Start time has passed
       // - Haven't sent notification yet
-      // - Are still pending
+      // - Are still pending or active
       const journeys = await Journey.find({
         startDate: { $lte: now },
         notificationSent: false,
@@ -60,8 +36,10 @@ class JourneyNotificationJobs {
           console.error(`Failed to process journey ${journey._id}:`, error);
         }
       }
+      return { success: true, count: journeys.length };
     } catch (error) {
       console.error('Error in checkJourneyStarts:', error);
+      throw error;
     }
   }
 
@@ -94,8 +72,10 @@ class JourneyNotificationJobs {
           console.error(`Failed to send 24h reminder for journey ${journey._id}:`, error);
         }
       }
+      return { success: true, count: journeys.length };
     } catch (error) {
       console.error('Error in check24HourReminders:', error);
+      throw error;
     }
   }
 
@@ -128,17 +108,12 @@ class JourneyNotificationJobs {
           console.error(`Failed to send 1h reminder for journey ${journey._id}:`, error);
         }
       }
+      return { success: true, count: journeys.length };
     } catch (error) {
       console.error('Error in check1HourReminders:', error);
+      throw error;
     }
   }
 }
 
 export default new JourneyNotificationJobs();
-
-// WHY THESE CRON SCHEDULES?
-// - */15 * * * * = Every 15 minutes (checks journey starts and 1h reminders)
-// - 0 * * * * = Every hour on the hour (24h reminders, less frequent)
-// - Time windows: Use ranges (23-24h) to catch journeys even if cron misses exact time
-// - Error handling per journey: One failure doesn't stop processing others
-// - Separate flags: Prevents duplicate notifications if cron runs multiple times

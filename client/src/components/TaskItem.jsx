@@ -43,10 +43,6 @@ const TaskItem = ({ task, journeyStatus, startDate, onUpdate, onDelete }) => {
 
   return (
     <motion.div
-      layout
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
       className={`group flex items-center gap-3 p-3 rounded-lg border border-transparent hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors ${
         task.completed ? 'opacity-50' : ''
       }`}

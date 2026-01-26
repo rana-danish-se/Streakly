@@ -1,15 +1,12 @@
-import cron from 'node-cron';
 import Journey from '../models/Journey.js';
 import Task from '../models/Task.js';
 import pushService from '../services/pushNotificationService.js';
 
 /**
- * Initialize Streak Reminder Job
- * Runs every day at 10:00 PM (22:00)
+ * Run Streak Reminder Job
+ * Checks active journeys and sends reminders if no task completed today
  */
-const initStreakReminder = () => {
-  // Schedule: 0 22 * * * = Every day at 22:00 (10 PM)
-  cron.schedule('0 22 * * *', async () => {
+const runStreakReminder = async () => {
     console.log('⏰ Running Streak Reminder Job...');
     
     try {
@@ -59,13 +56,12 @@ const initStreakReminder = () => {
       }
 
       console.log(`✅ Streak Reminder Job Completed. Sent ${notificationsSent} notifications.`);
+      return { success: true, count: notificationsSent };
 
     } catch (error) {
       console.error('❌ Error in Streak Reminder Job:', error);
+      throw error;
     }
-  });
-
-  console.log('📅 Streak Reminder Cron Job scheduled for 10:00 PM daily.');
 };
 
-export default initStreakReminder;
+export default runStreakReminder;
