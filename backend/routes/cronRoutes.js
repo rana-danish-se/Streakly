@@ -1,3 +1,4 @@
+import express from 'express';
 import { triggerJourneyCheck, triggerStreakReminder, triggerDailyRun } from '../controllers/cronController.js';
 
 const router = express.Router();
