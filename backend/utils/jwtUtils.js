@@ -22,7 +22,7 @@ export const setTokenCookie = (res, token) => {
   const options = {
     httpOnly: true, // Prevents XSS attacks
     secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    sameSite: 'strict', // Prevents CSRF attacks
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in prod (if needed), 'lax' for local
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
   };
 

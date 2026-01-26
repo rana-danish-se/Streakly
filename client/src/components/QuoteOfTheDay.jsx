@@ -4,6 +4,8 @@ import { FiStar } from 'react-icons/fi';
 import { HiLightningBolt } from 'react-icons/hi';
 import { useTheme } from '../contexts/ThemeContext';
 
+import api from '../services/api';
+
 const QuoteOfTheDay = () => {
   const { theme } = useTheme();
   const [quote, setQuote] = useState({ text: "Loading quote...", author: "" });
@@ -12,9 +14,9 @@ const QuoteOfTheDay = () => {
   useEffect(() => {
     const fetchQuote = async () => {
       try {
-        // Using a CORS proxy to avoid CORS issues with ZenQuotes API in the browser
-        const response = await fetch('https://api.allorigins.win/raw?url=https://zenquotes.io/api/random');
-        const data = await response.json();
+        // Fetch quote from our backend proxy
+        const response = await api.get('/quotes/random');
+        const data = response.data;
         if (data && data[0]) {
           setQuote({ text: data[0].q, author: data[0].a });
         }

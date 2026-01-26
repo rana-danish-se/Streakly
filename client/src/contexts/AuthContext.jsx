@@ -37,7 +37,9 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       const data = await authAPI.register(userData);
-      setUser(data.user);
+      const token = data.token || (data.data && data.data.token);
+      if (token) localStorage.setItem('token', token);
+      setUser(data.user || (data.data && data.data.user));
       return { success: true, data };
     } catch (err) {
       setError(err.message);
@@ -50,6 +52,9 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       const data = await authAPI.login(credentials);
       // The backend returns { success: true, user: {...}, token: '...' }
+      const token = data.token || (data.data && data.data.token);
+      if (token) localStorage.setItem('token', token);
+      
       if (data.user) {
         setUser(data.user);
       } else if (data.data && data.data.user) {
@@ -65,6 +70,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await authAPI.logout();
+      localStorage.removeItem('token');
       setUser(null);
       return { success: true };
     } catch (err) {
@@ -101,6 +107,9 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       const data = await authAPI.googleAuth(idToken);
       // The backend returns { success: true, user: {...}, token: '...' }
+      const token = data.token || (data.data && data.data.token);
+      if (token) localStorage.setItem('token', token);
+
       if (data.user) {
         setUser(data.user);
       } else if (data.data && data.data.user) {

@@ -8,6 +8,8 @@ import authRoutes from './routes/authRoutes.js';
 import journeyRoutes from './routes/journeyRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
 import pushSubscriptionRoutes from './routes/pushSubscription.js';
+import quoteRoutes from './routes/quoteRoutes.js';
+
 import cronRoutes from './routes/cronRoutes.js';
 
 // Load environment variables
@@ -42,6 +44,7 @@ app.use('/api/journeys/:journeyId/tasks', taskRoutes); // Nested task routes
 app.use('/api/tasks', taskRoutes); // Top-level task routes
 app.use('/api/push', pushSubscriptionRoutes);
 app.use('/api/cron', cronRoutes);
+app.use('/api/quotes', quoteRoutes);
 
 
 

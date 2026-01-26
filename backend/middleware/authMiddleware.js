@@ -8,6 +8,10 @@ export const protect = async (req, res, next) => {
     // Get token from cookie
     if (req.cookies.token) {
       token = req.cookies.token;
+    } 
+    // Get token from header
+    else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
     }
     // Check if token exists
     if (!token) {
