@@ -6,18 +6,22 @@ import TaskItem from './TaskItem';
 
 const JourneyTaskList = ({ tasks = [], journeyStatus, startDate, onUpdate, onDelete }) => {
   const { theme } = useTheme();
+  const [visibleActive, setVisibleActive] = React.useState(10);
+  const [visibleCompleted, setVisibleCompleted] = React.useState(10);
   
-  // Smart Sorting: Active tasks first (by creation), then completed (by completion time)
-  const sortedTasks = [...tasks].sort((a, b) => {
-    if (a.completed !== b.completed) return a.completed ? 1 : -1;
-    if (a.completed) {
-       return new Date(b.completedAt || 0) - new Date(a.completedAt || 0);
-    }
-    return new Date(b.createdAt) - new Date(a.createdAt);
-  });
+  // Sorting:
+  // Active: ascending order (oldest added first)
+  const activeTasks = [...tasks]
+    .filter(t => !t.completed)
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
-  const activeTasks = sortedTasks.filter(t => !t.completed);
-  const completedTasks = sortedTasks.filter(t => t.completed);
+  // Completed: ascending order (completed first should be at top)
+  const completedTasks = [...tasks]
+    .filter(t => t.completed)
+    .sort((a, b) => new Date(a.completedAt || 0) - new Date(b.completedAt || 0));
+
+  const displayedActive = activeTasks.slice(0, visibleActive);
+  const displayedCompleted = completedTasks.slice(0, visibleCompleted);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -121,7 +125,7 @@ const JourneyTaskList = ({ tasks = [], journeyStatus, startDate, onUpdate, onDel
            className="space-y-3"
          >
            <AnimatePresence mode="popLayout" initial={false}>
-             {activeTasks.map(task => (
+             {displayedActive.map(task => (
                <motion.div
                  key={task._id}
                  variants={itemVariants}
@@ -142,6 +146,25 @@ const JourneyTaskList = ({ tasks = [], journeyStatus, startDate, onUpdate, onDel
              ))}
            </AnimatePresence>
          </motion.div>
+
+          {/* Load More Active */}
+          {activeTasks.length > visibleActive && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setVisibleActive(prev => prev + 10)}
+              className="w-full mt-4 py-3 rounded-xl text-sm font-semibold transition-all"
+              style={{
+                backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                border: '1px dashed',
+                borderColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                color: 'var(--text)',
+                opacity: 0.8
+              }}
+            >
+              Load More Active Tasks ({activeTasks.length - visibleActive} remaining)
+            </motion.button>
+          )}
 
          {/* Empty State for Active Tasks */}
          {activeTasks.length === 0 && (
@@ -290,34 +313,53 @@ const JourneyTaskList = ({ tasks = [], journeyStatus, startDate, onUpdate, onDel
            </motion.div>
 
            {/* Completed Tasks List */}
-           <motion.div
-             variants={containerVariants}
-             initial="hidden"
-             animate="visible"
-             className="space-y-3"
-             style={{ opacity: 0.7 }}
-             whileHover={{ opacity: 1 }}
-             transition={{ duration: 0.3 }}
-           >
-             <AnimatePresence mode="popLayout" initial={false}>
-               {completedTasks.map(task => (
-                 <motion.div
-                   key={task._id}
-                   variants={itemVariants}
-                   layout
-                   className="relative z-0"
-                 >
-                   <TaskItem 
-                     task={task} 
-                     journeyStatus={journeyStatus}
-                     startDate={startDate}
-                     onUpdate={onUpdate} 
-                     onDelete={onDelete}
-                   />
-                 </motion.div>
-               ))}
-             </AnimatePresence>
-           </motion.div>
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-3"
+              style={{ opacity: 0.7 }}
+              whileHover={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <AnimatePresence mode="popLayout" initial={false}>
+                {displayedCompleted.map(task => (
+                  <motion.div
+                    key={task._id}
+                    variants={itemVariants}
+                    layout
+                    className="relative z-0"
+                  >
+                    <TaskItem 
+                      task={task} 
+                      journeyStatus={journeyStatus}
+                      startDate={startDate}
+                      onUpdate={onUpdate} 
+                      onDelete={onDelete}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Load More Completed */}
+            {completedTasks.length > visibleCompleted && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setVisibleCompleted(prev => prev + 10)}
+                className="w-full mt-4 py-3 rounded-xl text-sm font-semibold transition-all"
+                style={{
+                  backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
+                  border: '1px dashed',
+                  borderColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                  color: 'var(--text)',
+                  opacity: 0.8
+                }}
+              >
+                Load More Completed Tasks ({completedTasks.length - visibleCompleted} remaining)
+              </motion.button>
+            )}
          </motion.div>
        )}
 

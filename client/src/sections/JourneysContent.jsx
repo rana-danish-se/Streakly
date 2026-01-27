@@ -118,8 +118,8 @@ const JourneysContent = () => {
     currentStreak: journey.currentStreak || 0,
     bestStreak: journey.bestStreak || 0,
     targetDays: journey.targetDays || 0,
-    totalTopics: journey.totalTasks || 0,
-    completedTopics: journey.completedTasks || 0,
+    totalTopics: journey.totalTopics || 0,
+    completedTopics: journey.completedTopics || 0,
     startDate: journey.startDate || journey.createdAt // Use actual startDate for calculations
   });
 

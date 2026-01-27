@@ -78,11 +78,38 @@ export const getJourneys = async (req, res) => {
     const journeys = await Journey.find({ user: req.user._id })
       .sort({ startDate: -1 });
 
+    // Performance Optimization: Get task counts for all journeys in one aggregation
+    const taskStats = await Task.aggregate([
+      { $match: { user: req.user._id } },
+      {
+        $group: {
+          _id: "$journey",
+          totalTopics: { $sum: 1 },
+          completedTopics: {
+            $sum: { $cond: ["$completed", 1, 0] }
+          }
+        }
+      }
+    ]);
+
+    // Map stats for easy lookup
+    const statsMap = taskStats.reduce((acc, stat) => {
+      acc[stat._id.toString()] = stat;
+      return acc;
+    }, {});
+
     // Update status for any journeys that should have started
     const now = new Date();
     const updates = [];
     
     for (const journey of journeys) {
+      // Inject dynamic task counts from aggregation for any missing or outdated data
+      const stats = statsMap[journey._id.toString()];
+      if (stats) {
+        journey.totalTopics = stats.totalTopics;
+        journey.completedTopics = stats.completedTopics;
+      }
+
       if (journey.status === 'pending' && journey.startDate <= now) {
         journey.status = 'active';
         updates.push(journey.save());
@@ -132,8 +159,7 @@ export const getJourney = async (req, res) => {
 
     // Get tasks for this journey to show in detail view
     const tasks = await Task.find({ journey: journey._id })
-      .sort({ completed: 1, completedAt: -1, createdAt: -1 })
-      .limit(50);
+      .sort({ completed: 1, completedAt: -1, createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -346,14 +372,14 @@ export const addResource = async (req, res) => {
       });
     }
 
-    const { type, url } = req.body;
+    const { type, url, filename } = req.body;
 
     // If it's a link, just add it directly
     if (type === 'link') {
       await journey.addResource({
         type: 'link',
         url,
-        filename: url
+        filename: filename || url
       });
 
       return res.status(200).json({
@@ -376,7 +402,9 @@ export const addResource = async (req, res) => {
       type: req.file.mimetype.startsWith('image/') ? 'image' : 'document',
       url: req.file.path, // Cloudinary URL
       filename: req.file.originalname,
-      cloudinaryId: req.file.filename // For deletion
+      cloudinaryId: req.file.filename, // This is actually the public_id in multer-storage-cloudinary
+      cloudinaryResourceType: req.file.resource_type, // 'image' or 'raw'
+      size: req.file.size
     };
 
     await journey.addResource(resourceData);
@@ -431,7 +459,9 @@ export const deleteResource = async (req, res) => {
     // Delete from Cloudinary if it's a file
     if (resource.cloudinaryId) {
       try {
-        await cloudinary.uploader.destroy(resource.cloudinaryId);
+        await cloudinary.uploader.destroy(resource.cloudinaryId, {
+          resource_type: resource.cloudinaryResourceType || 'image'
+        });
       } catch (cloudinaryError) {
         console.error('Cloudinary deletion error:', cloudinaryError);
         // Continue even if Cloudinary deletion fails

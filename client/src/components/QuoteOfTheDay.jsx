@@ -7,18 +7,36 @@ import { useTheme } from '../contexts/ThemeContext';
 import api from '../services/api';
 
 const QuoteOfTheDay = () => {
-  const { theme } = useTheme();
   const [quote, setQuote] = useState({ text: "Loading quote...", author: "" });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchQuote = async () => {
       try {
-        // Fetch quote from our backend proxy
+        const today = new Date().toISOString().split('T')[0];
+        const cachedQuoteStr = localStorage.getItem('daily_quote');
+        
+        if (cachedQuoteStr) {
+          const cachedQuote = JSON.parse(cachedQuoteStr);
+          if (cachedQuote.date === today) {
+            setQuote({ text: cachedQuote.q, author: cachedQuote.a });
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Fetch quote from our backend proxy if no valid cache
         const response = await api.get('/quotes/random');
         const data = response.data;
         if (data && data[0]) {
-          setQuote({ text: data[0].q, author: data[0].a });
+          const newQuote = { q: data[0].q, a: data[0].a };
+          setQuote({ text: newQuote.q, author: newQuote.a });
+          
+          // Save to cache
+          localStorage.setItem('daily_quote', JSON.stringify({
+            ...newQuote,
+            date: today
+          }));
         }
       } catch (error) {
         console.error('Error fetching quote:', error);

@@ -172,7 +172,7 @@ const MainDashboard = () => {
                           style={{ color: 'var(--text)' }}
                         >
                           <FiTarget className="w-4 h-4" />
-                          {journey.completedTasks || 0}/{journey.totalTasks || 0} tasks
+                          {journey.completedTopics || 0}/{journey.totalTopics || 0} tasks
                         </span>
                         <span 
                           className="flex items-center gap-1"

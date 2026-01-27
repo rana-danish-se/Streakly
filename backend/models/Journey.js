@@ -17,6 +17,12 @@ const resourceSchema = new mongoose.Schema(
     cloudinaryId: {
       type: String, // For Cloudinary file deletion
     },
+    cloudinaryResourceType: {
+      type: String, // 'image' or 'raw'
+    },
+    size: {
+      type: Number, // File size in bytes
+    },
     uploadedAt: {
       type: Date,
       default: Date.now,
@@ -66,6 +72,16 @@ const journeySchema = new mongoose.Schema(
       min: 0,
     },
     totalDays: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    completedTopics: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    totalTopics: {
       type: Number,
       default: 0,
       min: 0,
@@ -157,6 +173,11 @@ journeySchema.methods.markCompleted = function (completionNotes) {
   }
   return this.save();
 };
+
+// Virtual for bestStreak (mapped to longestStreak)
+journeySchema.virtual('bestStreak').get(function() {
+  return this.longestStreak;
+});
 
 // Ensure virtuals are included in JSON
 journeySchema.set("toJSON", { virtuals: true });

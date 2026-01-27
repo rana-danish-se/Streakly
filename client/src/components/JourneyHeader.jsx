@@ -401,6 +401,7 @@ const JourneyHeader = ({
 
             {/* Resources Link */}
             <motion.button
+              onClick={() => navigate(`/dashboard/journey/${journey._id}/resources`)}
               className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium"
               style={{ 
                 backgroundColor: theme === 'dark' ? 'rgba(129, 140, 248, 0.1)' : 'rgba(99, 102, 241, 0.05)',

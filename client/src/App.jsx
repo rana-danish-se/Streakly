@@ -13,6 +13,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Journeys from './pages/Journeys';
 import JourneyDetails from './pages/JourneyDetails';
+import JourneyResources from './pages/JourneyResources';
 import './index.css';
 
 function AnimatedRoutes() {
@@ -28,6 +29,7 @@ function AnimatedRoutes() {
         <Route path="/dashboard/journeys" element={<Journeys />} />
         <Route path="/dashboard/journeys/:id" element={<JourneyDetails />} />
         <Route path="/dashboard/journey/:id" element={<JourneyDetails />} />
+        <Route path="/dashboard/journey/:id/resources" element={<JourneyResources />} />
       </Routes>
     </AnimatePresence>
   );

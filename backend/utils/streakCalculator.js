@@ -172,11 +172,15 @@ export const updateJourneyStats = (tasks) => {
   const longestStreak = calculateLongestStreak(tasks);
   const totalDays = calculateTotalDays(tasks);
   const progress = calculateProgress(tasks);
+  const completedTopics = tasks.filter(task => task.completed).length;
+  const totalTopics = tasks.length;
 
   return {
     currentStreak,
     longestStreak: Math.max(longestStreak, currentStreak),
     totalDays,
-    progress
+    progress,
+    completedTopics,
+    totalTopics
   };
 };

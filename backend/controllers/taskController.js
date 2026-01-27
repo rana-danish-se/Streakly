@@ -46,6 +46,8 @@ export const createTask = async (req, res) => {
     journey.longestStreak = stats.longestStreak;
     journey.totalDays = stats.totalDays;
     journey.progress = stats.progress;
+    journey.completedTopics = stats.completedTopics;
+    journey.totalTopics = stats.totalTopics;
     await journey.save();
 
     res.status(201).json({
@@ -104,12 +106,15 @@ export const createBulkTasks = async (req, res) => {
       });
     }
 
-    // Create tasks
-    const taskObjects = tasks.map(name => ({
+    // Create tasks with slightly different timestamps to ensure order is preserved during sorting
+    const now = Date.now();
+    const taskObjects = tasks.map((name, index) => ({
       journey: journeyId,
       user: req.user._id,
       name,
-      completed: false, // Explicitly set to false for new tasks
+      completed: false,
+      createdAt: new Date(now + index), // Increment by 1ms for each task
+      updatedAt: new Date(now + index)
     }));
 
     const createdTasks = await Task.insertMany(taskObjects);
@@ -122,6 +127,8 @@ export const createBulkTasks = async (req, res) => {
     journey.longestStreak = stats.longestStreak;
     journey.totalDays = stats.totalDays;
     journey.progress = stats.progress;
+    journey.completedTopics = stats.completedTopics;
+    journey.totalTopics = stats.totalTopics;
     await journey.save();
 
     res.status(201).json({
@@ -154,7 +161,7 @@ export const createBulkTasks = async (req, res) => {
 export const getJourneyTasks = async (req, res) => {
   try {
     const journeyId = req.params.journeyId;
-    const { limit = 50 } = req.query;
+    const { limit } = req.query;
 
     // Check if journey exists and user owns it
     const journey = await Journey.findById(journeyId);
@@ -173,9 +180,14 @@ export const getJourneyTasks = async (req, res) => {
       });
     }
 
-    const tasks = await Task.find({ journey: journeyId })
-      .sort({ completed: 1, completedAt: -1, createdAt: -1 })
-      .limit(parseInt(limit));
+    let tasksQuery = Task.find({ journey: journeyId })
+      .sort({ completed: 1, completedAt: -1, createdAt: -1 });
+
+    if (limit) {
+      tasksQuery = tasksQuery.limit(parseInt(limit));
+    }
+
+    const tasks = await tasksQuery;
 
     res.status(200).json({
       success: true,
@@ -313,7 +325,9 @@ export const updateTask = async (req, res) => {
             currentStreak: journey.currentStreak,
             longestStreak: journey.longestStreak,
             totalDays: journey.totalDays,
-            progress: journey.progress
+            progress: journey.progress,
+            completedTopics: journey.completedTopics,
+            totalTopics: journey.totalTopics
           }
         }
       });
@@ -381,7 +395,9 @@ export const deleteTask = async (req, res) => {
                 currentStreak: journey.currentStreak,
                 longestStreak: journey.longestStreak,
                 totalDays: journey.totalDays,
-                progress: journey.progress
+                progress: journey.progress,
+                completedTopics: journey.completedTopics,
+                totalTopics: journey.totalTopics
             }
         }
       });

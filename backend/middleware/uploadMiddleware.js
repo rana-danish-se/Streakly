@@ -1,92 +1,65 @@
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { cloudinary } from '../config/cloudinary.js';
+import { getResourceType } from '../utils/fileType.js';
 
-// Configure Cloudinary storage for images
-const imageStorage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'streakly/images',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-    transformation: [{ width: 1000, height: 1000, crop: 'limit' }],
+/**
+ * Optimized Cloudinary Storage for Images and Documents (Raw)
+ * Follows the core rule: PDFs and DOCs must be resource_type: "raw"
+ */
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
+    const resourceType = getResourceType(file.mimetype);
+    
+    // Clean filename: remove extension for public_id to avoid double extensions
+    const nameWithoutExt = file.originalname.split('.').slice(0, -1).join('.');
+    const cleanName = nameWithoutExt
+      .replace(/\s+/g, '_')
+      .replace(/[^a-zA-Z0-9_-]/g, '');
+
+    return {
+      folder: resourceType === "image" ? "streakly/images" : "streakly/documents",
+      resource_type: resourceType,
+      public_id: `${Date.now()}-${cleanName}`,
+      // For raw resources, we don't specify allowed_formats here as Cloudinary handle them differently
+      // But we can specify them for images
+      ...(resourceType === "image" ? { allowed_formats: ['jpg', 'png', 'webp', 'gif', 'jpeg'] } : {})
+    };
   },
 });
 
-// Configure Cloudinary storage for documents (PDFs, DOCs)
-const documentStorage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'streakly/documents',
-    allowed_formats: ['pdf', 'doc', 'docx'],
-    resource_type: 'raw', // For non-image files
-  },
-});
-
-// File filter function
+// File filter function for security
 const fileFilter = (req, file, cb) => {
-  // Allowed image types
-  const imageTypes = /jpeg|jpg|png|gif|webp/;
-  // Allowed document types
-  const documentTypes = /pdf|doc|docx/;
-  
-  const mimetype = file.mimetype.toLowerCase();
-  const isImage = imageTypes.test(mimetype.split('/')[1]);
-  const isDocument = documentTypes.test(mimetype.split('/')[1]) || mimetype.includes('pdf');
-  
-  if (isImage || isDocument) {
-    cb(null, true);
-  } else {
-    cb(new Error('Invalid file type. Only images (JPEG, PNG, GIF, WebP) and documents (PDF, DOC, DOCX) are allowed.'), false);
-  }
-};
-
-// Image upload middleware
-export const uploadImage = multer({
-  storage: imageStorage,
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024, // 10MB default
-  },
-});
-
-// Document upload middleware
-export const uploadDocument = multer({
-  storage: documentStorage,
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024, // 10MB default
-  },
-});
-
-// General upload middleware (supports both images and documents)
-export const uploadFile = multer({
-  storage: imageStorage, // Will be overridden based on file type
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024,
-  },
-});
-
-// Helper function to delete file from Cloudinary
-export const deleteFromCloudinary = async (publicId) => {
   try {
-    const result = await cloudinary.uploader.destroy(publicId);
-    return result;
+    getResourceType(file.mimetype);
+    cb(null, true);
   } catch (error) {
-    console.error('Error deleting from Cloudinary:', error);
-    throw error;
+    cb(new Error(error.message), false);
   }
 };
 
-// Helper function to delete raw files (PDFs, docs)
-export const deleteRawFromCloudinary = async (publicId) => {
+// General upload middleware
+export const uploadFile = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024, // 10MB default
+  },
+});
+
+/**
+ * Helper function to delete file from Cloudinary correctly.
+ */
+export const deleteFromCloudinary = async (publicId, resourceType = 'image') => {
+  // If the publicId includes the folder, destroy handles it
   try {
     const result = await cloudinary.uploader.destroy(publicId, {
-      resource_type: 'raw'
+      resource_type: resourceType
     });
     return result;
   } catch (error) {
-    console.error('Error deleting raw file from Cloudinary:', error);
+    console.error(`Error deleting ${resourceType} from Cloudinary:`, error);
     throw error;
   }
 };
