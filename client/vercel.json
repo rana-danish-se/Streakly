@@ -5,7 +5,7 @@
       "destination": "/service-worker.js"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/|.*\\.(?:js|css|png|jpg|jpeg|gif|ico|svg|json|webmanifest)$|api/).*)",
       "destination": "/index.html"
     }
   ],

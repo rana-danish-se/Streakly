@@ -3,7 +3,7 @@
 /* eslint-disable no-undef */
 
 // Service worker version - increment to force update
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = `journey-tracker-${CACHE_VERSION}`;
 
 // Listen for push events from server
@@ -135,20 +135,40 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
+  // Handle navigation requests (like index.html) with Network First strategy
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then(function(response) {
+          // If successful, cache the new version
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then(function(cache) {
+            cache.put(event.request, responseClone);
+          });
+          return response;
+        })
+        .catch(function() {
+          // If network fails, try to serve from cache
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then(function(response) {
-      // Return cached version or fetch from network
-      return response || fetch(event.request);
+      // Use cache first for assets, but fetch from network if missing
+      return response || fetch(event.request).then(function(networkResponse) {
+        // Optionally cache assets that weren't in the initial list
+        if (networkResponse && networkResponse.status === 200) {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(function(cache) {
+            cache.put(event.request, responseClone);
+          });
+        }
+        return networkResponse;
+      });
     })
   );
 });
 
-// WHY THESE EVENT LISTENERS?
-// - push: Receives notifications from server, shows them to user
-// - notificationclick: Handles user clicking notification
-// - notificationclose: Optional analytics tracking
-// - install: Caches important assets for offline use
-// - activate: Cleans up old caches when updating
-// - fetch: Enables offline functionality by serving cached content
-// - skipWaiting: Updates service worker immediately
-// - clients.claim: Takes control of all pages right away
