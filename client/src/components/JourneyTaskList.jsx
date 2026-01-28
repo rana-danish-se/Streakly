@@ -54,7 +54,7 @@ const JourneyTaskList = ({ tasks = [], journeyStatus, startDate, onUpdate, onDel
   };
 
   return (
-    <div className="space-y-6 relative">
+    <div className="space-y-6 scrollbar-hide relative">
        
       <motion.div
         className="absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full blur-3xl pointer-events-none opacity-50"

@@ -184,7 +184,17 @@ const Sidebar = () => {
                 </motion.div>
               </motion.div>
 
-              <nav className="flex-1 px-4 py-6 overflow-y-auto">
+              <nav 
+                className="flex-1 px-4 py-6 overflow-y-auto"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                <style>
+                  {`
+                    nav::-webkit-scrollbar {
+                      display: none;
+                    }
+                  `}
+                </style>
                 <div className="space-y-1">
                   {menuItems.map((item, index) => {
                     const isActive = location.pathname === item.path;

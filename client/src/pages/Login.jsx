@@ -66,7 +66,7 @@ const Login = () => {
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       setIsLoading(true);
-      const result = await googleLogin(credentialResponse.credential);
+      const result = await googleLogin(credentialResponse.credential, 'login');
       setIsLoading(false);
 
       if (result.success) {

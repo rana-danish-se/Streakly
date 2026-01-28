@@ -218,7 +218,7 @@ const JourneyDetails = () => {
   if (!journey) return null;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-50">
+    <div className="h-screen bg-white dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-50 overflow-hidden flex">
       {showConfetti && (
         <Confetti
           width={windowSize.width}
@@ -230,7 +230,7 @@ const JourneyDetails = () => {
       
       <Sidebar />
 
-      <main className="lg:ml-80 overflow-x-hidden p-6 min-h-screen relative bg-white dark:bg-slate-950">
+      <main className="flex-1 lg:ml-80 h-full overflow-y-auto overflow-x-hidden  p-6 relative bg-white dark:bg-slate-950 scrollbar-hide">
         
         <JourneyHeader 
             journey={journey}

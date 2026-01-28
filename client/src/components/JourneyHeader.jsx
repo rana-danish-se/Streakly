@@ -73,7 +73,7 @@ const JourneyHeader = ({
 
   return (
     <div 
-      className="relative border mb-5 overflow-hidden"
+      className="relative scrollbar-hide mb-5 overflow-hidden"
       style={{ 
         backgroundColor: theme === 'dark' ? 'rgba(2, 6, 23, 0.8)' : 'rgba(248, 250, 252, 0.8)',
         borderColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'

@@ -519,7 +519,7 @@ export const uploadProfilePic = async (req, res) => {
 
 export const googleAuth = async (req, res) => {
   try {
-    const { idToken } = req.body;
+    const { idToken, mode } = req.body;
 
     if (!idToken) {
       return res.status(400).json({
@@ -570,11 +570,13 @@ export const googleAuth = async (req, res) => {
       });
     }
 
+    // Check by email
     user = await User.findOne({ email });
 
     if (user) {
+      // If user exists by email, link google account
       user.googleId = googleId;
-      if (!user.profilePicture) {
+      if (!user.profilePicture && typeof picture === 'string' && picture.length > 0) {
         user.profilePicture = picture;
       }
       user.isVerified = true;
@@ -604,12 +606,23 @@ export const googleAuth = async (req, res) => {
       });
     }
 
+    // If we reach here, user does not exist.
+    // Check mode
+    if (mode === 'login') {
+      return res.status(404).json({
+        success: false,
+        message: 'Account not found. Please sign up to continue.'
+      });
+    }
+
+    // Default or mode === 'signup', create new user
     user = await User.create({
       name,
       email,
       googleId,
       authProvider: 'google',
-      profilePicture: picture
+      profilePicture: typeof picture === 'string' && picture.length > 0 ? picture : undefined,
+      isVerified: true
     });
 
     const token = generateToken(user._id);

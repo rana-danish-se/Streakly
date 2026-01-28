@@ -32,6 +32,7 @@
     background-color: var(--bg);
     color: var(--text);
     font-family: 'Inter', sans-serif;
+    overflow-x: hidden; /* Prevent horizontal scroll */
     @apply transition-colors duration-200;
   }
 
@@ -110,7 +111,9 @@
   background: var(--bg);
 }
 
-
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
 /* ===== FIREFOX ===== */
 
 * {

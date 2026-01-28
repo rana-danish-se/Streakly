@@ -64,8 +64,8 @@ export const authAPI = {
   },
 
   // Google OAuth authentication
-  googleAuth: async (idToken) => {
-    const response = await api.post('/auth/google', { idToken });
+  googleAuth: async (idToken, mode) => {
+    const response = await api.post('/auth/google', { idToken, mode });
     // Backend returns { success: true, data: { user: {...}, token: '...' } }
     return response.data.data || response.data;
   },

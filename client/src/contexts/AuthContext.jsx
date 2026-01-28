@@ -116,10 +116,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const googleLogin = async (idToken) => {
+  const googleLogin = async (idToken, mode) => {
     try {
       setError(null);
-      const data = await authAPI.googleAuth(idToken);
+      const data = await authAPI.googleAuth(idToken, mode);
       
       const token = data.token || (data.data && data.data.token);
       if (token) localStorage.setItem('token', token);

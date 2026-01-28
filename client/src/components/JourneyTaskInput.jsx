@@ -47,7 +47,7 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
 
   return (
     <motion.div
-      className="relative rounded-2xl overflow-hidden"
+      className="relative scrollbar-hide rounded-2xl overflow-hidden"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 100, damping: 15 }}
