@@ -9,6 +9,8 @@ import ResourceListSection from '../sections/ResourceListSection';
 import AddLinkModal from '../components/AddLinkModal';
 import { getJourney, addResource, deleteResource } from '../services/journeyService';
 
+import { useTheme } from '../contexts/ThemeContext';
+
 // Helper to format file size
 const formatFileSize = (bytes) => {
   if (!bytes) return null;
@@ -40,6 +42,7 @@ const mapBackendResources = (backendResources) => {
 };
 
 const JourneyResources = () => {
+  const { theme } = useTheme();
   const { id: journeyId } = useParams();
   
   // State management
@@ -173,8 +176,48 @@ const JourneyResources = () => {
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-50">
       <Sidebar />
-      <main className="lg:ml-80 p-6 min-h-screen relative bg-white dark:bg-slate-950">
-        <div className="max-w-7xl mx-auto space-y-6">
+
+      <main className="lg:ml-80 p-6 min-h-screen relative bg-white dark:bg-slate-950 overflow-hidden">
+        {/* Background Glow */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            className="absolute -top-[20%] -right-[10%] w-[70%] h-[70%] rounded-full blur-[100px] opacity-30"
+            style={{
+              background: theme === 'dark' 
+                ? 'radial-gradient(circle, rgba(129, 140, 248, 0.4) 0%, rgba(99, 102, 241, 0.1) 50%, transparent 70%)' 
+                : 'radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, rgba(79, 70, 229, 0.1) 50%, transparent 70%)'
+            }}
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+          <motion.div
+            className="absolute top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full blur-[100px] opacity-20"
+            style={{
+              background: theme === 'dark' 
+                ? 'radial-gradient(circle, rgba(45, 212, 191, 0.4) 0%, rgba(20, 184, 166, 0.1) 50%, transparent 70%)' 
+                : 'radial-gradient(circle, rgba(20, 184, 166, 0.3) 0%, rgba(13, 148, 136, 0.1) 50%, transparent 70%)'
+            }}
+            animate={{
+              scale: [1.2, 1, 1.2],
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1
+            }}
+          />
+        </div>
+
+        <div className="max-w-7xl mx-auto space-y-6 relative z-10">
           
           {/* Header Section */}
           <motion.div

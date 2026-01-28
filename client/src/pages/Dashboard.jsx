@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Sidebar from '../components/Sidebar';
-import MainDashboard from '../sections/MainDashbaord';
+import MainDashboard from '../sections/MainDashboard';
 
 const Dashboard = () => {
   const navigate = useNavigate();

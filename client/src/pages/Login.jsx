@@ -54,7 +54,12 @@ const Login = () => {
       toast.success('Login successful! Welcome back 🎉');
       navigate('/dashboard');
     } else {
-      toast.error(result.error || 'Login failed. Please try again.');
+      if (result.data && result.data.isVerified === false) {
+        toast.info('Please verify your email address');
+        navigate(`/otp-verification?email=${encodeURIComponent(formData.email)}`);
+      } else {
+        toast.error(result.error || 'Login failed. Please try again.');
+      }
     }
   };
 
@@ -243,13 +248,15 @@ const Login = () => {
                   Remember me
                 </span>
               </label>
-              <button 
-                type="button"
-                className="text-sm font-semibold hover:underline" 
-                style={{ color: 'var(--primary)' }}
-              >
-                Forgot password?
-              </button>
+              <Link to="/forgot-password">
+                <button 
+                  type="button"
+                  className="text-sm font-semibold hover:underline" 
+                  style={{ color: 'var(--primary)' }}
+                >
+                  Forgot password?
+                </button>
+              </Link>
             </div>
 
             {/* Sign In Button */}

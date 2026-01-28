@@ -56,9 +56,3 @@ export default function Header() {
   );
 }
 
-// WHY THIS COMPONENT?
-// - Consistent header across all pages
-// - Visual notification status indicator
-// - Uses context for real-time status updates
-// - Responsive design with Tailwind
-// - Clear branding and navigation

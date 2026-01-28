@@ -31,16 +31,13 @@ const taskSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Compound index for efficient queries
 taskSchema.index({ journey: 1, createdAt: -1 });
 taskSchema.index({ user: 1, createdAt: -1 });
 
-// Virtual to get task date (YYYY-MM-DD format)
 taskSchema.virtual('taskDate').get(function() {
   return this.createdAt.toISOString().split('T')[0];
 });
 
-// Ensure virtuals are included in JSON
 taskSchema.set('toJSON', { virtuals: true });
 taskSchema.set('toObject', { virtuals: true });
 

@@ -34,8 +34,14 @@ const JourneyDetails = () => {
     totalDays: 0,
     progress: 0
   });
-  // Calculate days passed based on totalDays from stats or assumption
-  // const daysPassed = stats.totalDays;
+  /*
+    const [stats, setStats] = useState({
+    currentStreak: 0,
+    longestStreak: 0,
+    totalDays: 0,
+    progress: 0
+  });
+  */
 
   const handleAddTasks = async (tasksList) => {
     if (journey.status === 'completed') {
@@ -77,7 +83,7 @@ const JourneyDetails = () => {
   };
 
   const handleDeleteTask = async (taskId) => {
-    // if (!window.confirm('Delete this task?')) return;
+
     try {
       const response = await deleteTask(taskId);
       if (response.success) {
@@ -109,7 +115,7 @@ const JourneyDetails = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-/*
+  /*
   const sortTasks = (tasksToSort) => {
     return [...tasksToSort].sort((a, b) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
@@ -119,7 +125,7 @@ const JourneyDetails = () => {
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
   };
-*/
+  */
 
   useEffect(() => {
     const fetchJourneyDetails = async () => {
@@ -159,7 +165,7 @@ const JourneyDetails = () => {
         toast.success('Congratulations! Journey Completed! 🎉');
         setTimeout(() => setShowConfetti(false), 8000);
       }
-    } catch (err) {
+    } catch {
       toast.error('Failed to complete journey');
     }
   };
@@ -172,7 +178,7 @@ const JourneyDetails = () => {
         setJourney(response.data);
         toast.success('Journey reactivated');
       }
-    } catch (err) {
+    } catch {
       toast.error('Failed to reactivate journey');
     }
   };
@@ -224,7 +230,7 @@ const JourneyDetails = () => {
       
       <Sidebar />
 
-      <main className="lg:ml-80 p-6 min-h-screen relative bg-white dark:bg-slate-950">
+      <main className="lg:ml-80 overflow-x-hidden p-6 min-h-screen relative bg-white dark:bg-slate-950">
         
         <JourneyHeader 
             journey={journey}

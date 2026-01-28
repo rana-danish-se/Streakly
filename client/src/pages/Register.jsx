@@ -72,10 +72,8 @@ const Register = () => {
     setIsLoading(false);
 
     if (result.success) {
-      toast.success('Account created successfully! Please login to continue 🎉');
-      setTimeout(() => {
-        navigate('/login');
-      }, 1000);
+      toast.success('Please verify your account');
+      navigate(`/otp-verification?email=${encodeURIComponent(formData.email)}`);
     } else {
       toast.error(result.error || 'Registration failed. Please try again.');
     }

@@ -2,17 +2,11 @@ import Task from '../models/Task.js';
 import Journey from '../models/Journey.js';
 import { updateJourneyStats } from '../utils/streakCalculator.js';
 
-/**
- * @desc    Create/log a task for a journey
- * @route   POST /api/journeys/:journeyId/tasks
- * @access  Private
- */
 export const createTask = async (req, res) => {
   try {
     const { name } = req.body;
     const journeyId = req.params.journeyId;
 
-    // Check if journey exists and user owns it
     const journey = await Journey.findById(journeyId);
 
     if (!journey) {
@@ -29,7 +23,6 @@ export const createTask = async (req, res) => {
       });
     }
 
-    // Create task
     const task = await Task.create({
       journey: journeyId,
       user: req.user._id,
@@ -38,7 +31,6 @@ export const createTask = async (req, res) => {
       completedAt: new Date()
     });
 
-    // Update journey stats
     const allTasks = await Task.find({ journey: journeyId }).sort({ createdAt: -1 });
     const stats = updateJourneyStats(allTasks);
 
@@ -72,14 +64,9 @@ export const createTask = async (req, res) => {
 // ... existing code ...
 };
 
-/**
- * @desc    Create multiple tasks for a journey
- * @route   POST /api/journeys/:journeyId/tasks/bulk
- * @access  Private
- */
 export const createBulkTasks = async (req, res) => {
   try {
-    const { tasks } = req.body; // Array of task names
+    const { tasks } = req.body;
     const journeyId = req.params.journeyId;
 
     if (!Array.isArray(tasks) || tasks.length === 0) {
@@ -89,7 +76,6 @@ export const createBulkTasks = async (req, res) => {
       });
     }
 
-    // Check if journey exists and user owns it
     const journey = await Journey.findById(journeyId);
 
     if (!journey) {
@@ -106,20 +92,18 @@ export const createBulkTasks = async (req, res) => {
       });
     }
 
-    // Create tasks with slightly different timestamps to ensure order is preserved during sorting
     const now = Date.now();
     const taskObjects = tasks.map((name, index) => ({
       journey: journeyId,
       user: req.user._id,
       name,
       completed: false,
-      createdAt: new Date(now + index), // Increment by 1ms for each task
+      createdAt: new Date(now + index),
       updatedAt: new Date(now + index)
     }));
 
     const createdTasks = await Task.insertMany(taskObjects);
 
-    // Update journey stats
     const allTasks = await Task.find({ journey: journeyId }).sort({ createdAt: -1 });
     const stats = updateJourneyStats(allTasks);
 
@@ -153,17 +137,11 @@ export const createBulkTasks = async (req, res) => {
 };
 
 
-/**
- * @desc    Get all tasks for a journey
- * @route   GET /api/journeys/:journeyId/tasks
- * @access  Private
- */
 export const getJourneyTasks = async (req, res) => {
   try {
     const journeyId = req.params.journeyId;
     const { limit } = req.query;
 
-    // Check if journey exists and user owns it
     const journey = await Journey.findById(journeyId);
 
     if (!journey) {
@@ -202,11 +180,6 @@ export const getJourneyTasks = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get single task
- * @route   GET /api/tasks/:id
- * @access  Private
- */
 export const getTask = async (req, res) => {
   try {
     const task = await Task.findById(req.params.id).populate('journey', 'title');
@@ -218,7 +191,6 @@ export const getTask = async (req, res) => {
       });
     }
 
-    // Check ownership
     if (task.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
@@ -238,11 +210,6 @@ export const getTask = async (req, res) => {
   }
 };
 
-/**
- * @desc    Update task
- * @route   PUT /api/tasks/:id
- * @access  Private
- */
 export const updateTask = async (req, res) => {
   try {
     let task = await Task.findById(req.params.id);
@@ -254,7 +221,6 @@ export const updateTask = async (req, res) => {
       });
     }
 
-    // Check ownership
     if (task.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
@@ -264,7 +230,6 @@ export const updateTask = async (req, res) => {
 
     const { name, completed } = req.body;
     
-    // Check journey status BEFORE updating task
     const journey = await Journey.findById(task.journey);
     if (!journey) {
       return res.status(404).json({
@@ -291,7 +256,6 @@ export const updateTask = async (req, res) => {
 
     if (name) updateData.name = name;
     
-    // Handle completion status change
     if (completed !== undefined) {
       updateData.completed = completed;
       updateData.completedAt = completed ? new Date() : null;
@@ -303,8 +267,6 @@ export const updateTask = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    // If completion status changed, recalculate journey stats
-    // If completion status changed, recalculate journey stats
     if (completed !== undefined) {
       const allTasks = await Task.find({ journey: task.journey }).sort({ createdAt: -1 });
       const stats = updateJourneyStats(allTasks);
@@ -315,7 +277,6 @@ export const updateTask = async (req, res) => {
       journey.progress = stats.progress;
       await journey.save();
       
-      // Return stats with response to update UI immediately
       return res.status(200).json({
         success: true,
         message: 'Task updated successfully',
@@ -346,11 +307,6 @@ export const updateTask = async (req, res) => {
   }
 };
 
-/**
- * @desc    Delete task
- * @route   DELETE /api/tasks/:id
- * @access  Private
- */
 export const deleteTask = async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
@@ -362,7 +318,6 @@ export const deleteTask = async (req, res) => {
       });
     }
 
-    // Check ownership
     if (task.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
@@ -372,10 +327,8 @@ export const deleteTask = async (req, res) => {
 
     const journeyId = task.journey;
 
-    // Delete task
     await Task.findByIdAndDelete(req.params.id);
 
-    // Recalculate journey stats
     const journey = await Journey.findById(journeyId);
     if (journey) {
       const allTasks = await Task.find({ journey: journeyId }).sort({ createdAt: -1 });

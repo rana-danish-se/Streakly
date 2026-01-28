@@ -18,7 +18,25 @@ const ResourceListSection = ({ resources, onDelete, loading }) => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Background Glow */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        <motion.div
+          className="absolute top-1/2 right-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px] opacity-40"
+          style={{
+            background: 'radial-gradient(circle, #22C55E 0%, transparent 70%)'
+          }}
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+      </div>
       <ResourceFilters 
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -33,7 +51,7 @@ const ResourceListSection = ({ resources, onDelete, loading }) => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
         className={viewMode === 'grid' 
-          ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" 
+          ? "flex items-center flex-wrap justify-center  gap-6" 
           : "space-y-3"
         }
       >

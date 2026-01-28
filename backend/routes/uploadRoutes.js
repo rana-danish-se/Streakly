@@ -4,7 +4,6 @@ import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Upload single image
 router.post('/image', protect, uploadImage.single('file'), (req, res) => {
   try {
     if (!req.file) {
@@ -33,7 +32,6 @@ router.post('/image', protect, uploadImage.single('file'), (req, res) => {
   }
 });
 
-// Upload single document
 router.post('/document', protect, uploadDocument.single('file'), (req, res) => {
   try {
     if (!req.file) {
@@ -62,7 +60,6 @@ router.post('/document', protect, uploadDocument.single('file'), (req, res) => {
   }
 });
 
-// Upload multiple files (mixed: images and documents)
 router.post('/multiple', protect, uploadFile.array('files', 10), (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {

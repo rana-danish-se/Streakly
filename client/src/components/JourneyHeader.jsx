@@ -73,13 +73,12 @@ const JourneyHeader = ({
 
   return (
     <div 
-      className="relative overflow-hidden"
+      className="relative border mb-5 overflow-hidden"
       style={{ 
         backgroundColor: theme === 'dark' ? 'rgba(2, 6, 23, 0.8)' : 'rgba(248, 250, 252, 0.8)',
         borderColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
       }}
     >
-      {/* Top Right Glow Effect */}
       <motion.div
         className="absolute -top-64 -left-64 w-[800px] h-[800px] rounded-full blur-3xl pointer-events-none"
         style={{
@@ -99,7 +98,6 @@ const JourneyHeader = ({
       />
       <div className="max-w-7xl mx-auto p-6 lg:p-8">
         
-        {/* Top Row: Back & Status */}
         <div className="flex items-center justify-between mb-6">
           <motion.button
             onClick={() => navigate('/dashboard/journeys')}
@@ -118,7 +116,6 @@ const JourneyHeader = ({
             <span>Back to Journeys</span>
           </motion.button>
 
-          {/* Status Badge - Moved here */}
           <motion.div
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold"
             style={{ 
@@ -134,13 +131,10 @@ const JourneyHeader = ({
           </motion.div>
         </div>
 
-        {/* Main Header Content */}
         <div className="grid lg:grid-cols-[1fr,auto] gap-6 items-start">
           
-          {/* Left Column: Title & Description */}
           <div className="space-y-4">
             
-            {/* Title */}
             <div>
               <h1 
                 className="text-3xl lg:text-4xl font-bold mb-3"
@@ -159,12 +153,10 @@ const JourneyHeader = ({
               )}
             </div>
 
-            {/* Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               
 
 
-              {/* Start Date */}
               <motion.div
                 className="p-4 rounded-xl"
                 style={{ 
@@ -202,7 +194,6 @@ const JourneyHeader = ({
                 </div>
               </motion.div>
 
-              {/* Target Days */}
               <motion.div
                 className="p-4 rounded-xl"
                 style={{ 
@@ -237,7 +228,6 @@ const JourneyHeader = ({
                 </div>
               </motion.div>
 
-              {/* Days Left */}
               <motion.div
                 className="p-4 rounded-xl"
                 style={{ 
@@ -276,10 +266,8 @@ const JourneyHeader = ({
 
           </div>
 
-          {/* Right Column: Actions */}
           <div className="flex flex-col gap-3 lg:min-w-[280px]">
             
-            {/* Primary Status Action */}
             {journey.status === 'active' && progress === 100 && (
               <motion.button 
                 onClick={onComplete} 
@@ -328,7 +316,6 @@ const JourneyHeader = ({
               </motion.button>
             )}
 
-            {/* Secondary Actions */}
             <div className="grid grid-cols-2 gap-3">
               <motion.button 
                 onClick={onEdit}
@@ -372,7 +359,6 @@ const JourneyHeader = ({
               </motion.button>
             </div>
 
-            {/* Achievements Button */}
             {stats?.achievementsCount > 0 && (
               <motion.button
                 className="flex items-center justify-between px-4 py-3 rounded-xl font-medium"
@@ -393,13 +379,11 @@ const JourneyHeader = ({
               </motion.button>
             )}
 
-            {/* Divider */}
             <div 
               className="h-px"
               style={{ backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }}
             />
 
-            {/* Resources Link */}
             <motion.button
               onClick={() => navigate(`/dashboard/journey/${journey._id}/resources`)}
               className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium"

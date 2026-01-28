@@ -24,16 +24,15 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: function() {
-      // Password is only required for local authentication
       return this.authProvider === 'local';
     },
     minlength: [6, 'Password must be at least 6 characters long'],
-    select: false // Don't return password by default in queries
+    select: false
   },
   googleId: {
     type: String,
     unique: true,
-    sparse: true // Allows null values while maintaining uniqueness
+    sparse: true
   },
   authProvider: {
     type: String,
@@ -45,6 +44,12 @@ const userSchema = new mongoose.Schema({
   },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
+  otp: String,
+  otpExpire: Date,
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -53,9 +58,7 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Hash password before saving
 userSchema.pre('save', async function(next) {
-  // Only hash the password if it has been modified (or is new) and exists
   if (!this.isModified('password') || !this.password) {
     return next();
   }
@@ -69,7 +72,6 @@ userSchema.pre('save', async function(next) {
   }
 });
 
-// Method to compare password for login
 userSchema.methods.comparePassword = async function(candidatePassword) {
   try {
     return await bcrypt.compare(candidatePassword, this.password);
@@ -78,18 +80,14 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
   }
 };
 
-// Method to generate reset password token
 userSchema.methods.createPasswordResetToken = function() {
-  // Generate random token
   const resetToken = crypto.randomBytes(20).toString('hex');
   
-  // Hash token and set to resetPasswordToken field (using crypto for speed/standards)
   this.resetPasswordToken = crypto
     .createHash('sha256')
     .update(resetToken)
     .digest('hex');
   
-  // Set expire (10 minutes)
   this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
   
   return resetToken;

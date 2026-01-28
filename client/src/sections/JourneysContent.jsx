@@ -32,7 +32,6 @@ const JourneysContent = () => {
       try {
         setLoading(true);
         const response = await getJourneys('all');
-        console.log('API Response:', response); // Debug log
         setJourneys(response.data?.journeys || []);
       } catch (error) {
         console.error('Error fetching journeys:', error);

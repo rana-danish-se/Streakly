@@ -14,7 +14,6 @@ import { useTheme } from '../contexts/ThemeContext';
 const ResourceCard = ({ resource, viewMode, onDelete }) => {
   const { theme } = useTheme();
 
-  // Helper to get formatted download URL for Cloudinary
   const getDownloadUrl = (url) => {
     if (!url || url.includes('fl_attachment')) return url;
     if (url.includes('res.cloudinary.com')) {
@@ -23,7 +22,21 @@ const ResourceCard = ({ resource, viewMode, onDelete }) => {
     return url;
   };
 
-  // Get icon and color for resource type
+  const getViewUrl = (url, type) => {
+    if (!url) return '#';
+    
+    const isDoc = type === 'doc' || 
+                 url.toLowerCase().endsWith('.doc') || 
+                 url.toLowerCase().endsWith('.docx');
+                 
+    if (isDoc) {
+      return `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`;
+    }
+    
+    return url;
+  };
+
+
   const getResourceConfig = (type) => {
     const configs = {
       pdf: { 
@@ -63,7 +76,7 @@ const ResourceCard = ({ resource, viewMode, onDelete }) => {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="group relative rounded-2xl p-6 h-full flex flex-col"
+        className="group relative rounded-2xl p-6 h-50 w-72 flex flex-col"
         style={{ 
           backgroundColor: 'var(--card)',
           border: '1px solid',
@@ -75,7 +88,6 @@ const ResourceCard = ({ resource, viewMode, onDelete }) => {
           borderColor: config.color
         }}
       >
-        {/* Icon */}
         <div 
           className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
           style={{ 
@@ -83,31 +95,37 @@ const ResourceCard = ({ resource, viewMode, onDelete }) => {
             color: config.color
           }}
         >
-          {config.icon}
+          {resource.type === 'image' ? (
+            <img 
+              src={resource.url} 
+              alt={resource.name}
+              className="w-full h-full object-cover rounded-xl"
+            />
+          ) : (
+            config.icon
+          )}
         </div>
 
-        {/* Name */}
         <h4 
-          className="font-bold mb-2 line-clamp-2"
+          className="font-bold mb-2 overflow-hidden text-ellipsis"
           style={{ color: 'var(--text)' }}
         >
           {resource.name}
         </h4>
 
-        {/* Meta Info */}
         <div className="flex items-center justify-between text-xs opacity-60 mb-4 mt-auto" style={{ color: 'var(--text)' }}>
           <span>{config.label}</span>
           {resource.size && <span>{resource.size}</span>}
         </div>
 
-        {/* Actions */}
         <div className="flex items-center gap-2">
           {resource.type !== 'link' ? (
             <>
               <motion.a
-                href={resource.url}
+                href={getViewUrl(resource.url, resource.type)}
                 target="_blank"
                 rel="noopener noreferrer"
+
                 className="flex-1 px-2 py-2 rounded-lg font-medium text-xs flex items-center justify-center gap-1.5"
                 style={{ 
                   backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
@@ -164,7 +182,6 @@ const ResourceCard = ({ resource, viewMode, onDelete }) => {
           </motion.button>
         </div>
 
-        {/* Date badge */}
         <div 
           className="absolute top-4 right-4 px-2 py-1 rounded-lg text-xs font-medium"
           style={{ 
@@ -196,7 +213,6 @@ const ResourceCard = ({ resource, viewMode, onDelete }) => {
         borderColor: config.color
       }}
     >
-      {/* Icon */}
       <div 
         className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
         style={{ 
@@ -207,7 +223,6 @@ const ResourceCard = ({ resource, viewMode, onDelete }) => {
         {config.icon}
       </div>
 
-      {/* Info */}
       <div className="flex-1 min-w-0">
         <h4 className="font-bold truncate" style={{ color: 'var(--text)' }}>
           {resource.name}
@@ -219,13 +234,13 @@ const ResourceCard = ({ resource, viewMode, onDelete }) => {
         </div>
       </div>
 
-      {/* Actions */}
       <div className="flex items-center gap-2">
         {resource.type !== 'link' && (
           <motion.a
-            href={resource.url}
+            href={getViewUrl(resource.url, resource.type)}
             target="_blank"
             rel="noopener noreferrer"
+
             className="px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2"
             style={{ 
               backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',

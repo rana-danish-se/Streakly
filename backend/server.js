@@ -12,13 +12,10 @@ import quoteRoutes from './routes/quoteRoutes.js';
 
 import cronRoutes from './routes/cronRoutes.js';
 
-// Load environment variables
 dotenv.config();
 
-// Initialize Express app
 const app = express();
 
-// Middleware
 const allowedOrigins = [
   process.env.CLIENT_URL,
   'http://localhost:5173',
@@ -28,12 +25,9 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    // Check if the origin is allowed
     const isAllowed = allowedOrigins.some(allowedOrigin => {
-      // Exact match or match without trailing slash
       return allowedOrigin === origin || allowedOrigin.replace(/\/$/, '') === origin;
     });
 
@@ -56,35 +50,25 @@ app.use(cors({
     'Date', 
     'X-Api-Version'
   ],
-  maxAge: 86400, // 24 hours preflight cache
+  maxAge: 86400, 
   optionsSuccessStatus: 204
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-
-// Connect to database
 connectDB();
 
-// Verify Cloudinary configuration
 verifyCloudinaryConfig();
 
-
-
-
-// Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/journeys', journeyRoutes);
-app.use('/api/journeys/:journeyId/tasks', taskRoutes); // Nested task routes
-app.use('/api/tasks', taskRoutes); // Top-level task routes
+app.use('/api/journeys/:journeyId/tasks', taskRoutes); 
+app.use('/api/tasks', taskRoutes); 
 app.use('/api/push', pushSubscriptionRoutes);
 app.use('/api/cron', cronRoutes);
 app.use('/api/quotes', quoteRoutes);
 
-
-
-// Root route
 app.get('/', (req, res) => {
   res.json({
     message: 'Welcome to Streakly API',
@@ -93,7 +77,6 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health check route
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'healthy',
@@ -101,7 +84,6 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.status || 500).json({
@@ -111,7 +93,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -119,7 +100,6 @@ app.use((req, res) => {
   });
 });
 
-// Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

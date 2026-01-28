@@ -7,7 +7,13 @@ const DOC_TYPES = [
 
 export const getResourceType = (mimeType) => {
   const normalizedMime = mimeType.toLowerCase();
+  
   if (IMAGE_TYPES.includes(normalizedMime)) return "image";
+  
+  if (normalizedMime === "application/pdf") return "image";
+  
   if (DOC_TYPES.includes(normalizedMime)) return "raw";
+  
   throw new Error(`Unsupported file type: ${mimeType}`);
 };
+

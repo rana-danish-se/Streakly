@@ -2,15 +2,13 @@ import User from '../models/User.js';
 import { generateToken, setTokenCookie, clearTokenCookie } from '../utils/jwtUtils.js';
 import bcrypt from 'bcrypt';
 import { OAuth2Client } from 'google-auth-library';
+import { sendEmail } from '../utils/emailUtils.js';
+import crypto from 'crypto';
 
-// @desc    Register new user
-// @route   POST /api/auth/register
-// @access  Public
 export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // Validation
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
@@ -18,39 +16,109 @@ export const register = async (req, res) => {
       });
     }
 
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'User with this email already exists'
-      });
+      if (existingUser.isVerified) {
+        return res.status(400).json({
+          success: false,
+          message: 'User with this email already exists'
+        });
+      } else {
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpire = new Date(Date.now() + 10 * 60 * 1000);
+
+        existingUser.otp = otp;
+        existingUser.otpExpire = otpExpire;
+        await existingUser.save();
+
+        const message = `Your verification code is: ${otp}. It expires in 10 minutes.`;
+        const html = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+            <h2 style="color: #008080;">Welcome Back to Streakly!</h2>
+            <p>It seems you haven't verified your email yet. Please use the following OTP to verify your email address:</p>
+            <div style="font-size: 24px; font-weight: bold; padding: 10px; background: #f4f4f4; text-align: center; border-radius: 5px; margin: 20px 0;">
+              ${otp}
+            </div>
+            <p>This code will expire in 10 minutes.</p>
+          </div>
+        `;
+
+        try {
+          await sendEmail({
+            email: existingUser.email,
+            subject: 'Email Verification - Streakly',
+            message,
+            html
+          });
+        } catch (err) {
+          // Email failed
+        }
+
+        return res.status(200).json({
+          success: true,
+          message: 'User already exists but is not verified. A new OTP has been sent.',
+          data: {
+            user: {
+              id: existingUser._id,
+              name: existingUser.name,
+              email: existingUser.email,
+              profilePicture: existingUser.profilePicture,
+              authProvider: existingUser.authProvider,
+              isVerified: false
+            }
+          }
+        });
+      }
     }
 
-    // Create user
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpire = new Date(Date.now() + 10 * 60 * 1000); 
+
     const user = await User.create({
       name,
       email,
-      password
+      password,
+      otp,
+      otpExpire
     });
 
-    // Generate token
-    const token = generateToken(user._id);
+    const message = `Your verification code is: ${otp}. It expires in 10 minutes.`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+        <h2 style="color: #008080;">Welcome to Streakly!</h2>
+        <p>Please use the following OTP to verify your email address:</p>
+        <div style="font-size: 24px; font-weight: bold; padding: 10px; background: #f4f4f4; text-align: center; border-radius: 5px; margin: 20px 0;">
+          ${otp}
+        </div>
+        <p>This code will expire in 10 minutes.</p>
+        <p>If you didn't create an account, please ignore this email.</p>
+      </div>
+    `;
 
-    // Set token in cookie
-    setTokenCookie(res, token);
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Email Verification - Streakly',
+        message,
+        html
+      });
+    } catch (err) {
+      // Email failed
+    }
 
     res.status(201).json({
       success: true,
-      message: 'User registered successfully',
+      message: 'User registered successfully. Please verify your email.',
       data: {
         user: {
           id: user._id,
           name: user.name,
           email: user.email,
+          profilePicture: user.profilePicture,
+          authProvider: user.authProvider,
+          isVerified: user.isVerified,
           createdAt: user.createdAt
-        },
-        token
+        }
       }
     });
   } catch (error) {
@@ -62,14 +130,10 @@ export const register = async (req, res) => {
   }
 };
 
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validation
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -77,7 +141,6 @@ export const login = async (req, res) => {
       });
     }
 
-    // Find user (include password for comparison)
     const user = await User.findOne({ email }).select('+password');
 
     if (!user) {
@@ -87,7 +150,6 @@ export const login = async (req, res) => {
       });
     }
 
-    // Check password
     const isPasswordMatch = await user.comparePassword(password);
 
     if (!isPasswordMatch) {
@@ -97,10 +159,16 @@ export const login = async (req, res) => {
       });
     }
 
-    // Generate token
+    if (!user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: 'Please verify your email to login',
+        isVerified: false
+      });
+    }
+
     const token = generateToken(user._id);
 
-    // Set token in cookie
     setTokenCookie(res, token);
 
     res.status(200).json({
@@ -111,7 +179,10 @@ export const login = async (req, res) => {
           id: user._id,
           name: user.name,
           email: user.email,
-          createdAt: user.createdAt
+          profilePicture: user.profilePicture,
+          authProvider: user.authProvider,
+          createdAt: user.createdAt,
+          isVerified: user.isVerified
         },
         token
       }
@@ -125,12 +196,8 @@ export const login = async (req, res) => {
   }
 };
 
-// @desc    Logout user
-// @route   POST /api/auth/logout
-// @access  Private
 export const logout = async (req, res) => {
   try {
-    // Clear token cookie
     clearTokenCookie(res);
 
     res.status(200).json({
@@ -146,9 +213,6 @@ export const logout = async (req, res) => {
   }
 };
 
-// @desc    Get current logged in user
-// @route   GET /api/auth/me
-// @access  Private
 export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -160,7 +224,10 @@ export const getMe = async (req, res) => {
           id: user._id,
           name: user.name,
           email: user.email,
-          createdAt: user.createdAt
+          profilePicture: user.profilePicture,
+          authProvider: user.authProvider,
+          createdAt: user.createdAt,
+          isVerified: user.isVerified
         }
       }
     });
@@ -200,21 +267,45 @@ export const forgotPassword = async (req, res) => {
     const resetToken = user.createPasswordResetToken();
     await user.save({ validateBeforeSave: false });
 
-    // In production, you would send this token via email
-    // For now, we'll return it in the response only in DEVELOPMENT
-    const responseData = {
-      message: 'If a user with that email exists, a password reset link has been sent.'
-    };
+    // Construct reset URL
+    const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
-    if (process.env.NODE_ENV === 'development') {
-      responseData.resetToken = resetToken;
+    const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
+    
+    // HTML email template
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+        <h2 style="color: #008080;">Password Reset Request</h2>
+        <p>You requested a password reset. Please click the button below to reset your password:</p>
+        <a href="${resetUrl}" style="display: inline-block; padding: 10px 20px; background-color: #008080; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0;">Reset Password</a>
+        <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>
+        <p>This link will expire in 10 minutes.</p>
+      </div>
+    `;
+
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Password Reset Token - Streakly',
+        message,
+        html
+      });
+
+      res.status(200).json({
+        success: true,
+        message: 'Email sent'
+      });
+    } catch (err) {
+      console.error(err);
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+      await user.save({ validateBeforeSave: false });
+
+      return res.status(500).json({
+        success: false,
+        message: 'Email could not be sent'
+      });
     }
-
-    res.status(200).json({
-      success: true,
-      message: 'Password reset token generated.',
-      data: responseData
-    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -246,20 +337,16 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    // Find users with non-expired reset tokens
-    const users = await User.find({
+    // Get hashed token
+    const resetPasswordToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken,
       resetPasswordExpire: { $gt: Date.now() }
     });
-
-    // Find the user with matching token
-    let user = null;
-    for (const u of users) {
-      const isMatch = await bcrypt.compare(resetToken, u.resetPasswordToken);
-      if (isMatch) {
-        user = u;
-        break;
-      }
-    }
 
     if (!user) {
       return res.status(400).json({
@@ -396,14 +483,44 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-// @desc    Google OAuth authentication
-// @route   POST /api/auth/google
-// @access  Public
+// @desc    Upload profile picture
+// @route   PUT /api/auth/profile-picture
+// @access  Private
+export const uploadProfilePic = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please upload a file'
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { profilePicture: req.file.path },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile picture updated successfully',
+      data: {
+        profilePicture: user.profilePicture
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error uploading profile picture',
+      error: error.message
+    });
+  }
+};
+
 export const googleAuth = async (req, res) => {
   try {
     const { idToken } = req.body;
 
-    // Validation
     if (!idToken) {
       return res.status(400).json({
         success: false,
@@ -411,10 +528,8 @@ export const googleAuth = async (req, res) => {
       });
     }
 
-    // Initialize Google OAuth client
     const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-    // Verify Google ID token
     let ticket;
     try {
       ticket = await client.verifyIdToken({
@@ -429,15 +544,12 @@ export const googleAuth = async (req, res) => {
       });
     }
 
-    // Extract user information from verified token
     const payload = ticket.getPayload();
     const { sub: googleId, email, name, picture } = payload;
 
-    // Check if user exists by Google ID
     let user = await User.findOne({ googleId });
 
     if (user) {
-      // User exists with this Google ID - login
       const token = generateToken(user._id);
       setTokenCookie(res, token);
 
@@ -458,18 +570,21 @@ export const googleAuth = async (req, res) => {
       });
     }
 
-    // Check if user exists with this email (account merging scenario)
     user = await User.findOne({ email });
 
     if (user) {
-      // User exists with this email - merge accounts
       user.googleId = googleId;
-      user.authProvider = 'google';
-      user.profilePicture = picture || user.profilePicture;
+      if (!user.profilePicture) {
+        user.profilePicture = picture;
+      }
+      user.isVerified = true;
+      user.otp = undefined;
+      user.otpExpire = undefined;
+      
       await user.save();
 
       const token = generateToken(user._id);
-      setTokenCookie(res, token);
+      setTokenCookie(res, token); 
 
       return res.status(200).json({
         success: true,
@@ -481,14 +596,14 @@ export const googleAuth = async (req, res) => {
             email: user.email,
             profilePicture: user.profilePicture,
             authProvider: user.authProvider,
-            createdAt: user.createdAt
+            createdAt: user.createdAt,
+            isVerified: user.isVerified
           },
           token
         }
       });
     }
 
-    // New user - create account
     user = await User.create({
       name,
       email,
@@ -519,6 +634,148 @@ export const googleAuth = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error authenticating with Google',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Verify email with OTP
+// @route   POST /api/auth/verify-email
+// @access  Public
+export const verifyEmail = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide email and OTP'
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email or OTP'
+      });
+    }
+
+    // Check if already verified
+    if (user.isVerified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is already verified'
+      });
+    }
+
+    // Check OTP and expiry
+    if (user.otp !== otp || user.otpExpire < Date.now()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired OTP'
+      });
+    }
+
+    // Mark as verified
+    user.isVerified = true;
+    user.otp = undefined;
+    user.otpExpire = undefined;
+    await user.save();
+
+    // Generate token
+    const token = generateToken(user._id);
+    setTokenCookie(res, token);
+
+    res.status(200).json({
+      success: true,
+      message: 'Email verified successfully',
+      data: {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          isVerified: user.isVerified
+        },
+        token
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error verifying email',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Resend OTP
+// @route   POST /api/auth/resend-otp
+// @access  Public
+export const resendOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide an email'
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'No user found with this email'
+      });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is already verified'
+      });
+    }
+
+    // Generate new OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpire = new Date(Date.now() + 10 * 60 * 1000);
+
+    user.otp = otp;
+    user.otpExpire = otpExpire;
+    await user.save();
+
+    // Send email
+    const message = `Your new verification code is: ${otp}. It expires in 10 minutes.`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+        <h2 style="color: #008080;">Email Verification</h2>
+        <p>Your new verification code is:</p>
+        <div style="font-size: 24px; font-weight: bold; padding: 10px; background: #f4f4f4; text-align: center; border-radius: 5px; margin: 20px 0;">
+          ${otp}
+        </div>
+        <p>This code will expire in 10 minutes.</p>
+      </div>
+    `;
+
+    await sendEmail({
+      email: user.email,
+      subject: 'New Verification Code - Streakly',
+      message,
+      html
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Verification code resent successfully'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error resending verification code',
       error: error.message
     });
   }

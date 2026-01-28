@@ -67,7 +67,6 @@ export default function NotificationBanner() {
               </button>
             </div>
 
-            {/* Error Message */}
             {error && (
               <p className="mt-3 text-sm text-red-200 bg-red-900/30 px-3 py-2 rounded-lg">
                 {error}
@@ -75,7 +74,6 @@ export default function NotificationBanner() {
             )}
           </div>
 
-          {/* Close Button */}
           <button
             onClick={handleDismiss}
             className="text-white/70 hover:text-white transition-colors flex-shrink-0"
@@ -87,11 +85,3 @@ export default function NotificationBanner() {
     </div>
   );
 }
-
-// WHY THIS COMPONENT?
-// - Non-intrusive: Appears after 2 seconds, user can dismiss
-// - Context integration: Uses global notification state
-// - localStorage: Remembers if user dismissed (won't annoy them)
-// - Gradient design: Eye-catching but professional
-// - Responsive: Works on mobile and desktop
-// - Clear value prop: Explains benefits of notifications

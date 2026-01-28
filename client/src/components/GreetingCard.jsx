@@ -8,16 +8,14 @@ const GreetingCard = () => {
   const { user } = useAuth();
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Update time every minute
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
-    }, 60000); // Update every 60 seconds
+    }, 60000); 
     
     return () => clearInterval(timer);
   }, []);
 
-  // Get greeting based on time
   const getGreeting = () => {
     const hour = currentTime.getHours();
     if (hour < 12) return 'Good Morning';
@@ -25,7 +23,6 @@ const GreetingCard = () => {
     return 'Good Evening';
   };
 
-  // Format date
   const formatDate = (date) => {
     return date.toLocaleDateString('en-US', { 
       weekday: 'long', 
@@ -35,7 +32,6 @@ const GreetingCard = () => {
     });
   };
 
-  // Get user's first name
   const getFirstName = () => {
     if (!user || !user.name) return 'User';
     return user.name.split(' ')[0];
@@ -51,7 +47,6 @@ const GreetingCard = () => {
         color: '#FFFFFF'
       }}
     >
-      {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
           className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-white opacity-10"
@@ -102,8 +97,6 @@ const GreetingCard = () => {
               Every topic you master brings you one step closer to excellence.
             </p>
           </div>
-
-          {/* Date Card */}
           <motion.div
             className="bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl p-6 min-w-[240px]"
             whileHover={{ scale: 1.05, y: -5 }}

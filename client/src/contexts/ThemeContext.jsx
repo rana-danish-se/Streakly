@@ -33,7 +33,6 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    // Check localStorage first, then system preference
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
       return savedTheme;
@@ -41,7 +40,6 @@ export const ThemeProvider = ({ children }) => {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
-  // Derive current theme colors directly from state to avoid useEffect sync state updates
   const currentThemeColors = themeConfig[theme];
 
   useEffect(() => {

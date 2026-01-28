@@ -52,9 +52,7 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: "spring", stiffness: 100, damping: 15 }}
     >
-      {/* Vibrant Background Gradient Orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Primary Orb - Purple/Blue */}
         <motion.div
           className="absolute -top-32 -left-32 w-80 h-80 rounded-full blur-3xl"
           style={{ 
@@ -74,7 +72,6 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
           }}
         />
 
-        {/* Secondary Orb - Green/Teal */}
         <motion.div
           className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full blur-3xl"
           style={{ 
@@ -95,7 +92,6 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
           }}
         />
 
-        {/* Accent Orb - Orange/Yellow */}
         <motion.div
           className="absolute top-1/2 right-10 w-64 h-64 rounded-full blur-3xl"
           style={{ 
@@ -106,6 +102,7 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
           animate={{
             scale: [1, 1.2, 1],
             x: [0, -20, 0],
+            y: [0, -20, 0],
           }}
           transition={{
             duration: 8,
@@ -116,7 +113,6 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
         />
       </div>
 
-      {/* Main Card with Solid Background */}
       <motion.div
         className="relative rounded-2xl overflow-hidden"
         style={{ 
@@ -136,7 +132,6 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
         }}
         transition={{ duration: 0.3 }}
       >
-        {/* Gradient Overlay */}
         <div 
           className="absolute inset-0 pointer-events-none opacity-50"
           style={{
@@ -146,7 +141,6 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
           }}
         />
 
-        {/* Animated Shine Effect on Focus */}
         {isFocused && (
           <motion.div
             className="absolute inset-0 pointer-events-none"
@@ -165,7 +159,6 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
           />
         )}
 
-        {/* Header with Gradient Background */}
         <motion.div 
           className="relative px-6 py-4 flex items-center gap-3"
           style={{ 
@@ -176,7 +169,6 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
             borderColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'
           }}
         >
-          {/* Animated Icon Container */}
           <motion.div
             className="relative w-10 h-10 rounded-xl flex items-center justify-center"
             style={{ 
@@ -191,7 +183,6 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
           >
             <FiList className="w-5 h-5 text-white relative z-10" />
             
-            {/* Icon glow */}
             {isFocused && (
               <motion.div
                 className="absolute inset-0 rounded-xl"
@@ -240,7 +231,6 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
             </p>
           </div>
 
-          {/* Task Counter Badge */}
           {input.trim() && (
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
@@ -257,9 +247,7 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
           )}
         </motion.div>
         
-        {/* Form */}
         <form onSubmit={handleSubmit} className="relative">
-          {/* Textarea Container */}
           <div className="relative p-6">
             <textarea
               value={input}
@@ -277,7 +265,6 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
               }}
             />
 
-            {/* Empty State Icon */}
             {!input && !isFocused && (
               <motion.div
                 className="absolute inset-0 flex items-center justify-center pointer-events-none"
@@ -303,11 +290,9 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
             )}
           </div>
           
-          {/* Footer */}
           <motion.div 
             className="px-6 pb-6 flex items-center justify-between gap-4"
           >
-            {/* Keyboard Shortcut */}
             <div className="flex items-center gap-2">
               <span className="text-xs opacity-50" style={{ color: 'var(--text)' }}>
                 Quick submit:
@@ -339,7 +324,6 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
               </div>
             </div>
 
-            {/* Submit Button */}
             <motion.button
               type="submit"
               disabled={!input.trim() || disabled}
@@ -360,7 +344,6 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
               } : {}}
               whileTap={!disabled && input.trim() ? { scale: 0.95 } : {}}
             >
-              {/* Shimmer effect */}
               {!disabled && input.trim() && (
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0"
@@ -380,7 +363,6 @@ const JourneyTaskInput = ({ onAddTasks, disabled }) => {
               <FiPlus className="w-5 h-5 relative z-10" />
               <span className="relative z-10">Add Tasks</span>
               
-              {/* Pulse on ready */}
               {!disabled && input.trim() && (
                 <motion.div
                   className="absolute inset-0 rounded-xl"

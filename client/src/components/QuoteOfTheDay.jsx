@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiStar } from 'react-icons/fi';
 import { HiLightningBolt } from 'react-icons/hi';
-import { useTheme } from '../contexts/ThemeContext';
+
 
 import api from '../services/api';
 
@@ -25,14 +25,12 @@ const QuoteOfTheDay = () => {
           }
         }
 
-        // Fetch quote from our backend proxy if no valid cache
         const response = await api.get('/quotes/random');
         const data = response.data;
         if (data && data[0]) {
           const newQuote = { q: data[0].q, a: data[0].a };
           setQuote({ text: newQuote.q, author: newQuote.a });
           
-          // Save to cache
           localStorage.setItem('daily_quote', JSON.stringify({
             ...newQuote,
             date: today
@@ -63,7 +61,6 @@ const QuoteOfTheDay = () => {
         borderColor: 'var(--primary)'
       }}
     >
-      {/* Background decoration */}
       <div className="absolute top-0 right-0 w-32 h-32 opacity-5">
         <motion.div
           animate={{ rotate: 360 }}

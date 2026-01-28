@@ -22,7 +22,7 @@
     --bg: #020617;
     --card: #020617;
     --text: #E5E7EB;
-    --primary: #818CF8;
+    --primary: #636EE0;
     --success: #4ADE80;
     --warning: #FBBF24;
     --danger: #F87171;
@@ -326,4 +326,14 @@ html {
   ::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* Autofill Override */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--text) !important;
+  transition: background-color 5000s ease-in-out 0s;
+  background-color: transparent !important;
 }

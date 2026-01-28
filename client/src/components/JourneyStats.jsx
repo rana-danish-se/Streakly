@@ -145,7 +145,7 @@ const JourneyStats = ({ refreshTrigger }) => {
   return (
     <motion.div
       variants={itemVariants}
-      className="grid grid-cols-1 mb-5 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+      className="grid grid-cols-1   sm:grid-cols-2 lg:grid-cols-4 gap-6"
     >
       {statsConfig.map((stat, index) => (
         loading ? (
@@ -167,7 +167,6 @@ const JourneyStats = ({ refreshTrigger }) => {
             }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
-            {/* Animated background gradient on hover */}
             <motion.div
               className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
               style={{
@@ -175,7 +174,6 @@ const JourneyStats = ({ refreshTrigger }) => {
               }}
             />
 
-            {/* Animated glow pulse */}
             <motion.div
               className="absolute inset-0 opacity-0 group-hover:opacity-100"
               animate={{
@@ -191,7 +189,6 @@ const JourneyStats = ({ refreshTrigger }) => {
               }}
             />
 
-            {/* Orbiting particles effect */}
             <motion.div
               className="absolute top-0 left-0 w-2 h-2 rounded-full opacity-0 group-hover:opacity-60"
               style={{ backgroundColor: stat.rawColor }}
@@ -231,7 +228,6 @@ const JourneyStats = ({ refreshTrigger }) => {
                   whileHover={{ rotate: 360, scale: 1.1 }}
                   transition={{ duration: 0.6 }}
                 >
-                  {/* Icon glow effect */}
                   <motion.div
                     className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100"
                     style={{
@@ -250,13 +246,11 @@ const JourneyStats = ({ refreshTrigger }) => {
                 </motion.div>
               </div>
 
-              {/* Value with glow */}
               <motion.div 
                 className="text-3xl font-bold mb-1 relative"
                 style={{ color: 'var(--text)' }}
                 whileHover={{ scale: 1.05 }}
               >
-                {/* Text glow on hover */}
                 <motion.span
                   className="absolute inset-0 blur-sm opacity-0 group-hover:opacity-70"
                   style={{ color: stat.rawColor }}
@@ -274,7 +268,6 @@ const JourneyStats = ({ refreshTrigger }) => {
               </div>
             </div>
 
-            {/* Corner accent */}
             <motion.div
               className="absolute top-0 right-0 w-20 h-20 opacity-0 group-hover:opacity-20 transition-opacity duration-500"
               style={{
@@ -283,7 +276,6 @@ const JourneyStats = ({ refreshTrigger }) => {
               }}
             />
 
-            {/* Bottom border glow */}
             <motion.div
               className="absolute bottom-0 left-0 right-0 h-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               style={{

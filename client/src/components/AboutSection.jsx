@@ -97,7 +97,6 @@ const AboutSection = () => {
 
   return (
     <section className="py-20 px-6 bg-white dark:bg-gray-900 relative overflow-hidden">
-      {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5 dark:opacity-10">
         <div className="absolute inset-0" style={{
           backgroundImage: `radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)`,
@@ -106,7 +105,6 @@ const AboutSection = () => {
       </div>
 
       <div className="container mx-auto max-w-7xl relative z-10">
-        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -132,7 +130,6 @@ const AboutSection = () => {
           </p>
         </motion.div>
 
-        {/* Mission Statement */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -158,7 +155,6 @@ const AboutSection = () => {
           </div>
         </motion.div>
 
-        {/* Features Grid */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -188,7 +184,6 @@ const AboutSection = () => {
           ))}
         </motion.div>
 
-        {/* Bottom CTA */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}

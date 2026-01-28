@@ -10,10 +10,13 @@ import { NotificationProvider } from './contexts/NotificationContext';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import VerifyOTP from './pages/VerifyOTP';
 import Dashboard from './pages/Dashboard';
 import Journeys from './pages/Journeys';
 import JourneyDetails from './pages/JourneyDetails';
 import JourneyResources from './pages/JourneyResources';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import './index.css';
 
 function AnimatedRoutes() {
@@ -25,6 +28,9 @@ function AnimatedRoutes() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/otp-verification" element={<VerifyOTP />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/journeys" element={<Journeys />} />
         <Route path="/dashboard/journeys/:id" element={<JourneyDetails />} />

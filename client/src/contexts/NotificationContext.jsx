@@ -8,7 +8,6 @@ export const NotificationProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Check initial status on mount
   useEffect(() => {
     checkNotificationStatus();
   }, []);
@@ -98,10 +97,3 @@ export const useNotificationContext = () => {
   }
   return context;
 };
-
-// WHY CONTEXT?
-// - Global state: Notification status accessible anywhere
-// - Avoid prop drilling: No need to pass props through multiple levels
-// - Centralized logic: All notification operations in one place
-// - Automatic updates: Components re-render when subscription changes
-// - Clean API: Simple hook interface for components

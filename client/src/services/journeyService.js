@@ -17,7 +17,6 @@ export const createJourney = async (journeyData) => {
  */
 export const getJourneys = async (status = 'active') => {
   const response = await api.get(`/journeys?status=${status}`);
-  console.log(response.data);
   return response.data;
 };
 
@@ -58,7 +57,7 @@ export const deleteJourney = async (journeyId) => {
  * @param {string} notes - Optional completion notes
  * @returns {Promise} Completed journey
  */
-// Removed duplicate completeJourney
+
 
 /**
  * Reactivate a completed journey

@@ -14,7 +14,7 @@ class PushNotificationService {
   // Convert VAPID key from base64 to Uint8Array
   urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
     const rawData = window.atob(base64);
     const outputArray = new Uint8Array(rawData.length);
     for (let i = 0; i < rawData.length; ++i) {
@@ -34,7 +34,6 @@ class PushNotificationService {
         scope: '/',
       });
 
-      console.log('Service Worker registered:', this.registration);
       // Wait for service worker to be ready with timeout
       const readyPromise = navigator.serviceWorker.ready;
       const timeoutPromise = new Promise((_, reject) => 
@@ -96,8 +95,6 @@ class PushNotificationService {
         applicationServerKey,
       });
 
-      console.log('Push subscription created:', this.subscription);
-
       // Send subscription to server
       await pushAPI.subscribe(this.subscription.toJSON());
 
@@ -117,7 +114,6 @@ class PushNotificationService {
       }
 
       if (!this.subscription) {
-        console.log('No subscription to unsubscribe from');
         return;
       }
 
@@ -129,7 +125,6 @@ class PushNotificationService {
       // Notify server
       await pushAPI.unsubscribe(endpoint);
 
-      console.log('Unsubscribed from push notifications');
       this.subscription = null;
     } catch (error) {
       console.error('Unsubscribe failed:', error);
@@ -162,7 +157,6 @@ class PushNotificationService {
       // Check if already subscribed
       const existingSubscription = await this.getSubscription();
       if (existingSubscription) {
-        console.log('Already subscribed');
         return existingSubscription;
       }
 
@@ -202,9 +196,3 @@ class PushNotificationService {
 
 // Export singleton instance
 export default new PushNotificationService();
-
-// WHY SINGLETON?
-// - Only one service worker registration needed
-// - Shared subscription state across components
-// - Prevents multiple registration attempts
-// - Consistent API throughout app

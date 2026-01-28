@@ -16,7 +16,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Check if user is logged in on mount
   useEffect(() => {
     checkAuth();
   }, []);
@@ -26,7 +25,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const data = await authAPI.getMe();
       setUser(data.user);
-    } catch (err) {
+    } catch {
       setUser(null);
     } finally {
       setLoading(false);
@@ -38,8 +37,11 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       const data = await authAPI.register(userData);
       const token = data.token || (data.data && data.data.token);
-      if (token) localStorage.setItem('token', token);
-      setUser(data.user || (data.data && data.data.user));
+      const user = data.user || (data.data && data.data.user);
+      if (token && user && user.isVerified) {
+        localStorage.setItem('token', token);
+        setUser(user);
+      }
       return { success: true, data };
     } catch (err) {
       setError(err.message);
@@ -51,7 +53,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       const data = await authAPI.login(credentials);
-      // The backend returns { success: true, user: {...}, token: '...' }
+      
       const token = data.token || (data.data && data.data.token);
       if (token) localStorage.setItem('token', token);
       
@@ -91,6 +93,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const uploadProfilePicture = async (formData) => {
+    try {
+      setError(null);
+      const data = await authAPI.uploadProfilePicture(formData);
+      setUser(prev => ({ ...prev, profilePicture: data.data.profilePicture }));
+      return { success: true, data };
+    } catch (err) {
+      setError(err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
   const changePassword = async (passwordData) => {
     try {
       setError(null);
@@ -106,10 +120,71 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       const data = await authAPI.googleAuth(idToken);
-      // The backend returns { success: true, user: {...}, token: '...' }
+      
       const token = data.token || (data.data && data.data.token);
       if (token) localStorage.setItem('token', token);
 
+      if (data.user) {
+        setUser(data.user);
+      } else if (data.data && data.data.user) {
+        setUser(data.data.user);
+      }
+      return { success: true, data };
+    } catch (err) {
+      setError(err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const verifyEmail = async (email, otp) => {
+    try {
+      setError(null);
+      const data = await authAPI.verifyEmail(email, otp);
+      const token = data.token || (data.data && data.data.token);
+      if (token) localStorage.setItem('token', token);
+      
+      if (data.user) {
+        setUser(data.user);
+      } else if (data.data && data.data.user) {
+        setUser(data.data.user);
+      }
+      return { success: true, data };
+    } catch (err) {
+      setError(err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const resendOTP = async (email) => {
+    try {
+      setError(null);
+      const data = await authAPI.resendOTP(email);
+      return { success: true, data };
+    } catch (err) {
+      setError(err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const forgotPassword = async (email) => {
+    try {
+      setError(null);
+      const data = await authAPI.forgotPassword(email);
+      return { success: true, data };
+    } catch (err) {
+      setError(err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const resetPassword = async (token, password) => {
+    try {
+      setError(null);
+      const data = await authAPI.resetPassword(token, password);
+      
+      const authtoken = data.token || (data.data && data.data.token);
+      if (authtoken) localStorage.setItem('token', authtoken);
+       
       if (data.user) {
         setUser(data.user);
       } else if (data.data && data.data.user) {
@@ -130,8 +205,13 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     updateProfile,
+    uploadProfilePicture,
     changePassword,
     googleLogin,
+    verifyEmail,
+    resendOTP,
+    forgotPassword,
+    resetPassword,
     checkAuth,
   };
 

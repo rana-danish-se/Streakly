@@ -4,11 +4,6 @@ import pushService from '../services/pushNotificationService.js';
 
 import { v2 as cloudinary } from 'cloudinary';
 
-/**
- * @desc    Create new journey
- * @route   POST /api/journeys
- * @access  Private
- */
 export const createJourney = async (req, res) => {
   try {
     const { title, description, targetDays, startDate } = req.body;
@@ -16,7 +11,6 @@ export const createJourney = async (req, res) => {
     const parsedStartDate = startDate ? new Date(startDate) : new Date();
     const now = new Date();
     
-    // Determine initial status based on start date
     const status = parsedStartDate > now ? 'pending' : 'active';
     
     const journey = await Journey.create({
@@ -28,14 +22,11 @@ export const createJourney = async (req, res) => {
       status
     });
 
-    // Send appropriate notification based on status
     try {
       let payload;
       if (status === 'active') {
-        // Journey starts immediately
         payload = pushService.createJourneyStartPayload(journey);
       } else {
-        // Journey is scheduled for future
         payload = pushService.createJourneyScheduledPayload(journey, parsedStartDate);
       }
       
@@ -46,8 +37,6 @@ export const createJourney = async (req, res) => {
         await journey.save();
       }
     } catch (error) {
-      console.error('Failed to send journey creation notification:', error);
-      // Don't fail journey creation if notification fails
     }
 
     res.status(201).json({
@@ -68,17 +57,11 @@ export const createJourney = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get all journeys for user
- * @route   GET /api/journeys?status=active|completed|all
- * @access  Private
- */
 export const getJourneys = async (req, res) => {
   try {
     const journeys = await Journey.find({ user: req.user._id })
       .sort({ startDate: -1 });
 
-    // Performance Optimization: Get task counts for all journeys in one aggregation
     const taskStats = await Task.aggregate([
       { $match: { user: req.user._id } },
       {
@@ -92,18 +75,15 @@ export const getJourneys = async (req, res) => {
       }
     ]);
 
-    // Map stats for easy lookup
     const statsMap = taskStats.reduce((acc, stat) => {
       acc[stat._id.toString()] = stat;
       return acc;
     }, {});
 
-    // Update status for any journeys that should have started
     const now = new Date();
     const updates = [];
     
     for (const journey of journeys) {
-      // Inject dynamic task counts from aggregation for any missing or outdated data
       const stats = statsMap[journey._id.toString()];
       if (stats) {
         journey.totalTopics = stats.totalTopics;
@@ -133,11 +113,6 @@ export const getJourneys = async (req, res) => {
 };
 
 
-/**
- * @desc    Get single journey with stats
- * @route   GET /api/journeys/:id
- * @access  Private
- */
 export const getJourney = async (req, res) => {
   try {
     const journey = await Journey.findById(req.params.id);
@@ -149,7 +124,6 @@ export const getJourney = async (req, res) => {
       });
     }
 
-    // Check ownership
     if (journey.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
@@ -157,7 +131,6 @@ export const getJourney = async (req, res) => {
       });
     }
 
-    // Get tasks for this journey to show in detail view
     const tasks = await Task.find({ journey: journey._id })
       .sort({ completed: 1, completedAt: -1, createdAt: -1 });
 
@@ -176,11 +149,6 @@ export const getJourney = async (req, res) => {
   }
 };
 
-/**
- * @desc    Update journey
- * @route   PUT /api/journeys/:id
- * @access  Private
- */
 export const updateJourney = async (req, res) => {
   try {
     let journey = await Journey.findById(req.params.id);
@@ -192,7 +160,6 @@ export const updateJourney = async (req, res) => {
       });
     }
 
-    // Check ownership
     if (journey.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
@@ -221,11 +188,6 @@ export const updateJourney = async (req, res) => {
   }
 };
 
-/**
- * @desc    Delete journey (soft delete)
- * @route   DELETE /api/journeys/:id
- * @access  Private
- */
 export const deleteJourney = async (req, res) => {
   try {
     const journey = await Journey.findById(req.params.id);
@@ -237,7 +199,6 @@ export const deleteJourney = async (req, res) => {
       });
     }
 
-    // Check ownership
     if (journey.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
@@ -245,12 +206,24 @@ export const deleteJourney = async (req, res) => {
       });
     }
 
-    // Hard delete journey and its tasks
+    if (journey.resources && journey.resources.length > 0) {
+      
+      const cloudinaryDeletions = journey.resources
+        .filter(res => res.cloudinaryId)
+        .map(res => 
+          cloudinary.uploader.destroy(res.cloudinaryId, {
+            resource_type: res.cloudinaryResourceType || 'image'
+          }).catch(err => {
+            return null;
+          })
+        );
+        
+      await Promise.all(cloudinaryDeletions);
+    }
+
     await Task.deleteMany({ journey: journey._id });
     await Journey.findByIdAndDelete(req.params.id);
 
-    // Note: We should ideally also delete resources from Cloudinary here
-    // but postponing that for optimization or background job
 
     res.status(200).json({
       success: true,
@@ -265,11 +238,6 @@ export const deleteJourney = async (req, res) => {
   }
 };
 
-/**
- * @desc    Mark journey as completed
- * @route   POST /api/journeys/:id/complete
- * @access  Private
- */
 export const completeJourney = async (req, res) => {
   try {
     const journey = await Journey.findById(req.params.id);
@@ -281,7 +249,6 @@ export const completeJourney = async (req, res) => {
       });
     }
 
-    // Check ownership
     if (journey.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
@@ -305,11 +272,6 @@ export const completeJourney = async (req, res) => {
   }
 };
 
-/**
- * @desc    Reactivate a completed journey
- * @route   POST /api/journeys/:id/reactivate
- * @access  Private
- */
 export const reactivateJourney = async (req, res) => {
   try {
     const journey = await Journey.findById(req.params.id);
@@ -328,7 +290,6 @@ export const reactivateJourney = async (req, res) => {
       });
     }
 
-    // Update status
     journey.status = 'active';
     journey.isActive = true;
     journey.completedAt = undefined;
@@ -348,11 +309,6 @@ export const reactivateJourney = async (req, res) => {
   }
 };
 
-/**
- * @desc    Add resource to journey (upload to Cloudinary)
- * @route   POST /api/journeys/:id/resources
- * @access  Private
- */
 export const addResource = async (req, res) => {
   try {
     const journey = await Journey.findById(req.params.id);
@@ -364,7 +320,6 @@ export const addResource = async (req, res) => {
       });
     }
 
-    // Check ownership
     if (journey.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
@@ -374,7 +329,6 @@ export const addResource = async (req, res) => {
 
     const { type, url, filename } = req.body;
 
-    // If it's a link, just add it directly
     if (type === 'link') {
       await journey.addResource({
         type: 'link',
@@ -389,7 +343,6 @@ export const addResource = async (req, res) => {
       });
     }
 
-    // For file uploads, expect file from Cloudinary middleware
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -397,13 +350,12 @@ export const addResource = async (req, res) => {
       });
     }
 
-    // File was uploaded to Cloudinary via middleware
     const resourceData = {
       type: req.file.mimetype.startsWith('image/') ? 'image' : 'document',
-      url: req.file.path, // Cloudinary URL
+      url: req.file.path, 
       filename: req.file.originalname,
-      cloudinaryId: req.file.filename, // This is actually the public_id in multer-storage-cloudinary
-      cloudinaryResourceType: req.file.resource_type, // 'image' or 'raw'
+      cloudinaryId: req.file.filename,
+      cloudinaryResourceType: req.file.resource_type, 
       size: req.file.size
     };
 
@@ -422,11 +374,6 @@ export const addResource = async (req, res) => {
   }
 };
 
-/**
- * @desc    Delete resource from journey
- * @route   DELETE /api/journeys/:id/resources/:resourceId
- * @access  Private
- */
 export const deleteResource = async (req, res) => {
   try {
     const journey = await Journey.findById(req.params.id);
@@ -438,7 +385,6 @@ export const deleteResource = async (req, res) => {
       });
     }
 
-    // Check ownership
     if (journey.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
@@ -446,7 +392,6 @@ export const deleteResource = async (req, res) => {
       });
     }
 
-    // Find the resource
     const resource = journey.resources.id(req.params.resourceId);
     
     if (!resource) {
@@ -456,17 +401,15 @@ export const deleteResource = async (req, res) => {
       });
     }
 
-    // Delete from Cloudinary if it's a file
     if (resource.cloudinaryId) {
       try {
-        await cloudinary.uploader.destroy(resource.cloudinaryId, {
+        const result = await cloudinary.uploader.destroy(resource.cloudinaryId, {
           resource_type: resource.cloudinaryResourceType || 'image'
         });
       } catch (cloudinaryError) {
-        console.error('Cloudinary deletion error:', cloudinaryError);
-        // Continue even if Cloudinary deletion fails
       }
     }
+
 
     await journey.removeResource(req.params.resourceId);
 
@@ -483,11 +426,6 @@ export const deleteResource = async (req, res) => {
   }
 };
 
-/**
- * @desc    Start a pending journey immediately
- * @route   POST /api/journeys/:id/start
- * @access  Private
- */
 export const startJourney = async (req, res) => {
   try {
     const journey = await Journey.findById(req.params.id);
@@ -513,7 +451,6 @@ export const startJourney = async (req, res) => {
       });
     }
 
-    // Update start date to now and status to active
     journey.startDate = new Date();
     journey.status = 'active';
     journey.isActive = true;
@@ -521,13 +458,10 @@ export const startJourney = async (req, res) => {
     
     await journey.save();
 
-    // Send push notification
     try {
       const payload = pushService.createJourneyStartPayload(journey);
       await pushService.sendToUser(req.user._id, payload);
     } catch (error) {
-       console.error('Failed to send journey start notification:', error);
-       // continue without failing request
     }
 
     res.status(200).json({
@@ -543,11 +477,6 @@ export const startJourney = async (req, res) => {
   }
 };
 
-/**
- * @desc    Get journey statistics for user
- * @route   GET /api/journeys/stats
- * @access  Private
- */
 export const getJourneyStats = async (req, res) => {
   try {
     const journeys = await Journey.find({ user: req.user._id });
@@ -555,7 +484,6 @@ export const getJourneyStats = async (req, res) => {
       journey: { $in: journeys.map(j => j._id) } 
     });
 
-    // Calculate statistics
     const totalJourneys = journeys.length;
     const activeJourneys = journeys.filter(j => j.status === 'active' && j.progress < 100).length;
     const completedJourneys = journeys.filter(j => j.progress === 100 || j.status === 'completed').length;

@@ -80,7 +80,6 @@ const NotificationPermission = () => {
         />
 
         <div className="relative p-6">
-          {/* Close Button */}
           <button
             onClick={handleDismiss}
             className="absolute top-4 right-4 p-1 rounded-lg transition-all hover:scale-110"
@@ -93,7 +92,6 @@ const NotificationPermission = () => {
           </button>
 
           <div className="flex items-start gap-4">
-            {/* Icon */}
             <motion.div 
               className="flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center"
               style={{ 
@@ -113,7 +111,6 @@ const NotificationPermission = () => {
               <FiBell size={28} />
             </motion.div>
 
-            {/* Content */}
             <div className="flex-1 pr-6">
               <h3 
                 className="text-lg font-bold mb-1"
@@ -128,7 +125,6 @@ const NotificationPermission = () => {
                 Get timely reminders when your journeys start and daily notifications to maintain your streak!
               </p>
               
-              {/* Actions */}
               <div className="flex gap-3">
                 <button
                   onClick={handleDismiss}

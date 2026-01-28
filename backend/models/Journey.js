@@ -15,13 +15,13 @@ const resourceSchema = new mongoose.Schema(
       type: String,
     },
     cloudinaryId: {
-      type: String, // For Cloudinary file deletion
+      type: String,
     },
     cloudinaryResourceType: {
-      type: String, // 'image' or 'raw'
+      type: String,
     },
     size: {
-      type: Number, // File size in bytes
+      type: Number,
     },
     uploadedAt: {
       type: Date,
@@ -86,7 +86,6 @@ const journeySchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
-    // Persistent progress field
     progress: {
       type: Number,
       default: 0,
@@ -115,7 +114,6 @@ const journeySchema = new mongoose.Schema(
         message: "Cannot have more than 20 resources per journey",
       },
     },
-    // Notification tracking
     notificationSent: {
       type: Boolean,
       default: false,
@@ -141,12 +139,10 @@ const journeySchema = new mongoose.Schema(
   },
 );
 
-// Index for faster queries
 journeySchema.index({ user: 1, isActive: 1 });
 journeySchema.index({ user: 1, createdAt: -1 });
 journeySchema.index({ startDate: 1, status: 1, notificationSent: 1 });
 
-// Method to add resource
 journeySchema.methods.addResource = function (resourceData) {
   if (this.resources.length >= 20) {
     throw new Error("Maximum 20 resources allowed per journey");
@@ -155,7 +151,6 @@ journeySchema.methods.addResource = function (resourceData) {
   return this.save();
 };
 
-// Method to remove resource
 journeySchema.methods.removeResource = function (resourceId) {
   this.resources = this.resources.filter(
     (r) => r._id.toString() !== resourceId,
@@ -163,7 +158,6 @@ journeySchema.methods.removeResource = function (resourceId) {
   return this.save();
 };
 
-// Method to mark as completed
 journeySchema.methods.markCompleted = function (completionNotes) {
   this.isActive = false;
   this.status = 'completed';
@@ -174,12 +168,10 @@ journeySchema.methods.markCompleted = function (completionNotes) {
   return this.save();
 };
 
-// Virtual for bestStreak (mapped to longestStreak)
 journeySchema.virtual('bestStreak').get(function() {
   return this.longestStreak;
 });
 
-// Ensure virtuals are included in JSON
 journeySchema.set("toJSON", { virtuals: true });
 journeySchema.set("toObject", { virtuals: true });
 

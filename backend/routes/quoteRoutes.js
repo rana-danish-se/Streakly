@@ -3,6 +3,6 @@ import { getQuote } from '../controllers/quoteController.js';
 
 const router = express.Router();
 
-router.get('/random', getQuote); // GET /api/quotes/random
+router.get('/random', getQuote);
 
 export default router;

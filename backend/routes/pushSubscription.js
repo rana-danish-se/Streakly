@@ -4,7 +4,6 @@ import PushSubscription from "../models/PushSubscription.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
-// Get VAPID public key (needed by client)
 router.get('/vapid-public-key', (req, res) => {
   res.json({
     success: true,
@@ -12,23 +11,19 @@ router.get('/vapid-public-key', (req, res) => {
   });
 });
 
-// Subscribe to push notifications
 router.post('/subscribe', protect, async (req, res) => {
   try {
     const { endpoint, keys } = req.body;
 
-    // Check if subscription already exists
     let subscription = await PushSubscription.findOne({ endpoint });
 
     if (subscription) {
-      // Update existing subscription
       subscription.user = req.user._id;
       subscription.keys = keys;
       subscription.isActive = true;
       subscription.userAgent = req.headers['user-agent'];
       await subscription.save();
     } else {
-      // Create new subscription
       subscription = await PushSubscription.create({
         user: req.user._id,
         endpoint,
@@ -50,7 +45,6 @@ router.post('/subscribe', protect, async (req, res) => {
   }
 });
 
-// Unsubscribe from push notifications
 router.post('/unsubscribe', protect, async (req, res) => {
   try {
     const { endpoint } = req.body;
@@ -72,7 +66,6 @@ router.post('/unsubscribe', protect, async (req, res) => {
   }
 });
 
-// Get user's subscriptions
 router.get('/my-subscriptions', protect, async (req, res) => {
   try {
     const subscriptions = await PushSubscription.find({
@@ -93,10 +86,3 @@ router.get('/my-subscriptions', protect, async (req, res) => {
 });
 
 export default router;
-
-// WHY THESE ROUTES?
-// - /vapid-public-key: Client needs this to create subscriptions
-// - /subscribe: Saves subscription from browser to database
-// - Update logic: User might resubscribe from same browser
-// - userAgent: Helps identify which device subscription is from
-// - /unsubscribe: Lets users opt out of notifications

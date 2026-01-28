@@ -279,13 +279,3 @@ export default function JourneyForm({ onJourneyCreated }) {
     </>
   );
 }
-
-// WHY THIS COMPONENT?
-// - Form validation: Checks required fields and date validity
-// - Date/time handling: Prevents past dates, sets minimum times
-// - Real-time feedback: Shows notification schedule as user picks date
-// - Context integration: Checks permission and offers to enable
-// - Success modal: Contextual prompt after creating journey
-// - Responsive grid: 2 columns on desktop, 1 on mobile
-// - Gradient design: Modern, eye-catching UI
-// - Error handling: Clear error messages for all failure cases

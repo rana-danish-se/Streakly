@@ -161,12 +161,3 @@ export default function NotificationSettings() {
     </div>
   );
 }
-
-// WHY THIS COMPONENT?
-// - Complete notification management UI
-// - Shows different states: enabled, disabled, blocked, unsupported
-// - Clear instructions for unblocking notifications
-// - Test button to verify notifications work
-// - Success state explains what notifications user will receive
-// - Uses context for state management
-// - Responsive and accessible design

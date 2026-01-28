@@ -85,7 +85,6 @@ const JourneyCard = ({ journey, onClick }) => {
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
       onClick={onClick}
     >
-      {/* Gradient overlay on hover */}
       <motion.div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
         style={{
@@ -94,7 +93,6 @@ const JourneyCard = ({ journey, onClick }) => {
       />
 
       <div className="relative z-10">
-        {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
@@ -130,9 +128,7 @@ const JourneyCard = ({ journey, onClick }) => {
           </motion.div>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-3 mb-4">
-          {/* Current Streak */}
           <div className="flex items-center gap-2">
             <div 
               className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -159,7 +155,6 @@ const JourneyCard = ({ journey, onClick }) => {
             </div>
           </div>
 
-          {/* Best Streak */}
           <div className="flex items-center gap-2">
             <div 
               className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -186,7 +181,6 @@ const JourneyCard = ({ journey, onClick }) => {
             </div>
           </div>
 
-          {/* Completed Tasks */}
           <div className="flex items-center gap-2">
             <div 
               className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -213,7 +207,6 @@ const JourneyCard = ({ journey, onClick }) => {
             </div>
           </div>
 
-          {/* Remaining Days */}
           <div className="flex items-center gap-2">
             <div 
               className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -242,7 +235,6 @@ const JourneyCard = ({ journey, onClick }) => {
         </div>
 
 
-        {/* View Details Button */}
         <motion.div
           className="flex items-center justify-between"
         >

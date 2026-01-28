@@ -47,19 +47,19 @@ const AboutDeveloper = () => {
     { 
       icon: <FiGithub className="w-6 h-6" />, 
       name: 'GitHub',
-      url: 'https://github.com/yourusername',
+      url: 'https://github.com/rana-danish-se',
       color: theme === 'dark' ? '#FFFFFF' : '#181717'
     },
     { 
       icon: <FiLinkedin className="w-6 h-6" />, 
       name: 'LinkedIn',
-      url: 'https://linkedin.com/in/yourusername',
+      url: 'https://www.linkedin.com/in/rana-danish-89349a32b/',
       color: '#0A66C2'
     },
     { 
       icon: <FiInstagram className="w-6 h-6" />, 
       name: 'Instagram',
-      url: 'https://instagram.com/yourusername',
+      url: 'https://www.instagram.com/rana_danish_65/',
       color: '#E4405F'
     }
   ];
@@ -294,7 +294,7 @@ const AboutDeveloper = () => {
                   Have questions or want to collaborate? Feel free to reach out!
                 </p>
                 <motion.a
-                  href="mailto:your.email@example.com"
+                  href="mailto:ranadanish.se@gmail.com"
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold bg-white"
                   style={{ color: 'var(--primary)' }}
                   whileHover={{ scale: 1.05 }}

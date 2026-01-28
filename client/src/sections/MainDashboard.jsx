@@ -29,7 +29,6 @@ const MainDashboard = () => {
       try {
         setLoading(true);
         const response = await getJourneys('active');
-        console.log('Dashboard API Response:', response); // Debug log
         // Get the most recent 4 journeys
         const recentJourneys = response.data?.journeys?.slice(0, 4) || [];
         setJourneys(recentJourneys);
@@ -86,7 +85,7 @@ const MainDashboard = () => {
 
         {/* Recent Journeys */}
         <motion.div variants={itemVariants}>
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-5">
             <div>
               <h2 
                 className="text-3xl font-bold mb-1"
@@ -137,7 +136,7 @@ const MainDashboard = () => {
               journeys.map((journey, index) => (
               <motion.div
                 key={journey._id}
-                className="group relative rounded-2xl p-6 cursor-pointer overflow-hidden"
+                className="group relative rounded-2xl p-6 mb-6 cursor-pointer overflow-hidden"
                 style={{ 
                   backgroundColor: 'var(--card)',
                   border: '1px solid',

@@ -35,6 +35,16 @@ export const authAPI = {
     return response.data;
   },
 
+  // Upload profile picture
+  uploadProfilePicture: async (formData) => {
+    const response = await api.put('/auth/profile-picture', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
   // Change password
   changePassword: async (passwordData) => {
     const response = await api.put('/auth/change-password', passwordData);
@@ -49,7 +59,7 @@ export const authAPI = {
 
   // Reset password
   resetPassword: async (token, password) => {
-    const response = await api.put(`/auth/reset-password/${token}`, { password });
+    const response = await api.post(`/auth/reset-password/${token}`, { password });
     return response.data;
   },
 
@@ -58,6 +68,18 @@ export const authAPI = {
     const response = await api.post('/auth/google', { idToken });
     // Backend returns { success: true, data: { user: {...}, token: '...' } }
     return response.data.data || response.data;
+  },
+  
+  // Verify email with OTP
+  verifyEmail: async (email, otp) => {
+    const response = await api.post('/auth/verify-email', { email, otp });
+    return response.data;
+  },
+
+  // Resend OTP
+  resendOTP: async (email) => {
+    const response = await api.post('/auth/resend-otp', { email });
+    return response.data;
   },
 };
 

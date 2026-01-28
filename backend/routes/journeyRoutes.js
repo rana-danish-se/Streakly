@@ -17,30 +17,26 @@ import { uploadFile } from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
 
-// All routes require authentication
 router.use(protect);
 
-// Journey CRUD routes
-router.get('/stats', getJourneyStats); // GET /api/journeys/stats (must be before /:id)
+router.get('/stats', getJourneyStats); 
 
 router.route('/')
-  .get(getJourneys)      // GET /api/journeys
-  .post(createJourney);  // POST /api/journeys
+  .get(getJourneys)      
+  .post(createJourney);  
 
 router.route('/:id')
-  .get(getJourney)       // GET /api/journeys/:id
-  .put(updateJourney)    // PUT /api/journeys/:id
-  .delete(deleteJourney); // DELETE /api/journeys/:id
+  .get(getJourney)       
+  .put(updateJourney)    
+  .delete(deleteJourney); 
 
-// Journey completion
-router.post('/:id/complete', completeJourney);     // POST /api/journeys/:id/complete
-router.post('/:id/reactivate', reactivateJourney); // POST /api/journeys/:id/reactivate
-router.post('/:id/start', startJourney);           // POST /api/journeys/:id/start
+router.post('/:id/complete', completeJourney);     
+router.post('/:id/reactivate', reactivateJourney); 
+router.post('/:id/start', startJourney);           
 
-// Resource management
 router.route('/:id/resources')
-  .post(uploadFile.single('file'), addResource); // POST /api/journeys/:id/resources
+  .post(uploadFile.single('file'), addResource); 
 
-router.delete('/:id/resources/:resourceId', deleteResource); // DELETE /api/journeys/:id/resources/:resourceId
+router.delete('/:id/resources/:resourceId', deleteResource);
 
 export default router;

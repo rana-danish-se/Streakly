@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FiX,
@@ -25,6 +25,20 @@ const JourneyModal = ({ isOpen, onClose, onSuccess }) => {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const dateInputRef = useRef(null);
+
+  const handleCustomDateClick = () => {
+    handleChange('startDate', 'custom');
+    setTimeout(() => {
+      if (dateInputRef.current) {
+        try {
+          dateInputRef.current.showPicker();
+        } catch {
+          dateInputRef.current.focus();
+        }
+      }
+    }, 100);
+  };
 
   useEffect(() => {
     if (!isOpen) {
@@ -32,16 +46,13 @@ const JourneyModal = ({ isOpen, onClose, onSuccess }) => {
     }
   }, [isOpen]);
 
-  // Get today's date in YYYY-MM-DD format
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
   };
 
-  // Get minimum date (today)
   const getMinDate = () => getTodayDate();
 
-  // Validate form
   const validateForm = () => {
     const newErrors = {};
 
@@ -325,7 +336,7 @@ const JourneyModal = ({ isOpen, onClose, onSuccess }) => {
                       {/* Pick Custom Date */}
                       <motion.button
                         type="button"
-                        onClick={() => handleChange('startDate', 'custom')}
+                        onClick={handleCustomDateClick}
                         className="p-4 rounded-xl font-semibold flex flex-col items-center gap-2 transition-all"
                         style={{ 
                           backgroundColor: formData.startDate === 'custom' 
@@ -364,6 +375,7 @@ const JourneyModal = ({ isOpen, onClose, onSuccess }) => {
                           transition={{ duration: 0.2 }}
                         >
                           <input
+                            ref={dateInputRef}
                             type="date"
                             value={formData.customDate}
                             onChange={(e) => handleChange('customDate', e.target.value)}
@@ -376,7 +388,8 @@ const JourneyModal = ({ isOpen, onClose, onSuccess }) => {
                               borderColor: errors.customDate 
                                 ? 'var(--danger)' 
                                 : theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-                              ringColor: 'var(--primary)'
+                              ringColor: 'var(--primary)',
+                              colorScheme: theme === 'dark' ? 'dark' : 'light'
                             }}
                           />
                           {errors.customDate && (

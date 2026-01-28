@@ -47,7 +47,6 @@ const TaskItem = ({ task, journeyStatus, startDate, onUpdate, onDelete }) => {
         task.completed ? 'opacity-50' : ''
       }`}
     >
-      {/* Checkbox */}
       <button
         onClick={handleToggleComplete}
         disabled={isLoading}
@@ -64,7 +63,11 @@ const TaskItem = ({ task, journeyStatus, startDate, onUpdate, onDelete }) => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.5 }}
             >
-              <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin" />
+              <div className={`w-4 h-4 border-2 rounded-full animate-spin ${
+                task.completed 
+                  ? 'border-white/50 border-t-white' 
+                  : 'border-slate-200 border-t-slate-900'
+              }`} />
             </motion.div>
           ) : task.completed && (
             <motion.div
@@ -78,7 +81,6 @@ const TaskItem = ({ task, journeyStatus, startDate, onUpdate, onDelete }) => {
         </AnimatePresence>
       </button>
 
-      {/* Content */}
       <div className="flex-1 min-w-0">
         {isEditing ? (
           <input
@@ -86,7 +88,7 @@ const TaskItem = ({ task, journeyStatus, startDate, onUpdate, onDelete }) => {
             type="text"
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
-            onBlur={handleSaveEdit} // Save on blur as well
+            onBlur={handleSaveEdit} 
             onKeyDown={handleKeyDown}
             className="w-full bg-transparent border-b-2 border-teal-500 focus:outline-none text-gray-900 dark:text-slate-50 font-medium px-1 py-0.5"
           />
@@ -107,7 +109,6 @@ const TaskItem = ({ task, journeyStatus, startDate, onUpdate, onDelete }) => {
         )}
       </div>
 
-      {/* Logic to prevent menu glitching if clicking outside */}
       <div className="relative"> 
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -123,7 +124,6 @@ const TaskItem = ({ task, journeyStatus, startDate, onUpdate, onDelete }) => {
         <AnimatePresence>
           {isMenuOpen && (
             <>
-              {/* Overlay to close menu on outside click */}
               <div 
                 className="fixed inset-0 z-10" 
                 onClick={() => setIsMenuOpen(false)} 

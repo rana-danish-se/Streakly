@@ -36,7 +36,6 @@ const ResourceFilters = ({
       transition={{ delay: 0.2 }}
       className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between"
     >
-      {/* Search Bar */}
       <div className="relative flex-1 max-w-md w-full">
         <FiSearch 
           className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 opacity-40"
@@ -57,7 +56,6 @@ const ResourceFilters = ({
         />
       </div>
 
-      {/* Filter Buttons */}
       <div className="flex items-center gap-2 flex-wrap">
         {typeFilters.map((filter) => (
           <motion.button
@@ -79,7 +77,6 @@ const ResourceFilters = ({
         ))}
       </div>
 
-      {/* View Mode Toggle */}
       <div className="flex items-center gap-2">
         <motion.button
           onClick={() => setViewMode('grid')}

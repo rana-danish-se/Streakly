@@ -7,7 +7,6 @@ export const getQuote = async (req, res) => {
     const data = await response.json();
     res.json(data);
   } catch (error) {
-    console.error('Error fetching quote:', error);
     res.status(500).json({
       success: false,
       message: 'Error fetching quote',

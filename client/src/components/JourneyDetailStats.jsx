@@ -48,7 +48,6 @@ const JourneyDetailStats = ({ stats, tasks = [] }) => {
       className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
     >
       
-      {/* 1. Progress Circle Card */}
       <motion.div
         variants={itemVariants}
         className="group relative rounded-2xl p-6 flex items-center gap-5"
@@ -64,7 +63,6 @@ const JourneyDetailStats = ({ stats, tasks = [] }) => {
         }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
-        {/* Subtle glow on hover */}
         <motion.div
           className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{
@@ -72,7 +70,6 @@ const JourneyDetailStats = ({ stats, tasks = [] }) => {
           }}
         />
 
-        {/* Progress Circle */}
         <div className="relative z-10 w-20 h-20 flex-shrink-0">
           <CircularProgressbar
             value={progress}
@@ -87,7 +84,6 @@ const JourneyDetailStats = ({ stats, tasks = [] }) => {
           />
         </div>
 
-        {/* Info */}
         <div className="relative z-10 flex-1 min-w-0">
           <h3 
             className="text-xs font-semibold uppercase tracking-wider mb-1.5 opacity-60"
@@ -107,7 +103,6 @@ const JourneyDetailStats = ({ stats, tasks = [] }) => {
         </div>
       </motion.div>
 
-      {/* 2. Current Streak Card */}
       <motion.div
         variants={itemVariants}
         className="group relative rounded-2xl p-6"
@@ -123,7 +118,6 @@ const JourneyDetailStats = ({ stats, tasks = [] }) => {
         }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
-        {/* Subtle glow */}
         <motion.div
           className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{
@@ -132,7 +126,6 @@ const JourneyDetailStats = ({ stats, tasks = [] }) => {
         />
 
         <div className="relative z-10">
-          {/* Header */}
           <div className="flex items-center gap-2.5 mb-3">
             <div 
               className="p-2 rounded-lg"
@@ -151,7 +144,6 @@ const JourneyDetailStats = ({ stats, tasks = [] }) => {
             </span>
           </div>
 
-          {/* Value */}
           <div 
             className="text-3xl font-bold"
             style={{ color: 'var(--text)' }}
@@ -162,7 +154,6 @@ const JourneyDetailStats = ({ stats, tasks = [] }) => {
         </div>
       </motion.div>
 
-      {/* 3. Best Streak Card */}
       <motion.div
         variants={itemVariants}
         className="group relative rounded-2xl p-6"
@@ -178,7 +169,6 @@ const JourneyDetailStats = ({ stats, tasks = [] }) => {
         }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
-        {/* Subtle glow */}
         <motion.div
           className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{
@@ -187,7 +177,6 @@ const JourneyDetailStats = ({ stats, tasks = [] }) => {
         />
 
         <div className="relative z-10">
-          {/* Header */}
           <div className="flex items-center gap-2.5 mb-3">
             <div 
               className="p-2 rounded-lg"
@@ -206,7 +195,6 @@ const JourneyDetailStats = ({ stats, tasks = [] }) => {
             </span>
           </div>
 
-          {/* Value */}
           <div 
             className="text-3xl font-bold"
             style={{ color: 'var(--text)' }}
@@ -217,7 +205,6 @@ const JourneyDetailStats = ({ stats, tasks = [] }) => {
         </div>
       </motion.div>
 
-      {/* 4. Tasks Counter Card */}
       <motion.div
         variants={itemVariants}
         className="group relative rounded-2xl p-6"
@@ -233,7 +220,6 @@ const JourneyDetailStats = ({ stats, tasks = [] }) => {
         }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
-        {/* Subtle glow */}
         <motion.div
           className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           style={{
@@ -242,7 +228,6 @@ const JourneyDetailStats = ({ stats, tasks = [] }) => {
         />
 
         <div className="relative z-10">
-          {/* Header */}
           <div className="flex items-center gap-2.5 mb-3">
             <div 
               className="p-2 rounded-lg"
