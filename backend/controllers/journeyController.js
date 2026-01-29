@@ -1,6 +1,7 @@
 import Journey from '../models/Journey.js';
 import Task from '../models/Task.js';
 import pushService from '../services/pushNotificationService.js';
+import Topic from '../models/Topic.js';
 
 import { v2 as cloudinary } from 'cloudinary';
 
@@ -56,6 +57,8 @@ export const createJourney = async (req, res) => {
     });
   }
 };
+
+
 
 export const getJourneys = async (req, res) => {
   try {
@@ -222,6 +225,7 @@ export const deleteJourney = async (req, res) => {
     }
 
     await Task.deleteMany({ journey: journey._id });
+    await Topic.deleteMany({ journey: journey._id });
     await Journey.findByIdAndDelete(req.params.id);
 
 
@@ -494,6 +498,12 @@ export const getJourneyStats = async (req, res) => {
       ? journeys.reduce((sum, j) => sum + (j.progress || 0), 0) / journeys.length 
       : 0;
 
+    // Aggregate Topic Stats - correctly fetching from Topic collection
+    const allTopics = await Topic.find({
+        journey: { $in: journeys.map(j => j._id) }
+    });
+    const completedTopics = allTopics.filter(t => t.completed).length;
+
     res.status(200).json({
       success: true,
       data: {
@@ -502,6 +512,7 @@ export const getJourneyStats = async (req, res) => {
         completedJourneys,
         totalTasks,
         completedTasks,
+        completedTopics, // Added this field
         longestStreak,
         averageProgress: Math.round(averageProgress)
       }

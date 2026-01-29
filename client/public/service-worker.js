@@ -3,7 +3,7 @@
 /* eslint-disable no-undef */
 
 // Service worker version - increment to force update
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const CACHE_NAME = `journey-tracker-${CACHE_VERSION}`;
 
 // Listen for push events from server
@@ -131,7 +131,7 @@ self.addEventListener('fetch', function(event) {
   }
 
   // Skip API requests - let the browser handle them directly
-  if (event.request.url.includes('/api/')) {
+  if (event.request.url.includes('/api/') || event.request.url.includes('res.cloudinary.com')) {
     return;
   }
 

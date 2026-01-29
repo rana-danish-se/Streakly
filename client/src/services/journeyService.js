@@ -1,4 +1,6 @@
 import api from './api';
+// Force refresh
+
 
 /**
  * Create a new journey
@@ -52,14 +54,6 @@ export const deleteJourney = async (journeyId) => {
 };
 
 /**
- * Mark journey as completed
- * @param {string} journeyId - Journey ID
- * @param {string} notes - Optional completion notes
- * @returns {Promise} Completed journey
- */
-
-
-/**
  * Reactivate a completed journey
  * @param {string} journeyId - Journey ID
  * @returns {Promise} Reactivated journey
@@ -107,13 +101,52 @@ export const completeJourney = async (journeyId, notes) => {
 };
 
 /**
+ * Create a new topic
+ * @param {string} journeyId - Journey ID
+ * @param {Object} topicData - { title, description, parentId }
+ */
+export const createTopic = async (journeyId, topicData) => {
+  const response = await api.post(`/journeys/${journeyId}/topics`, { ...topicData, journeyId });
+  return response.data;
+};
+
+/**
+ * Get topics for a journey
+ * @param {string} journeyId
+ */
+export const getTopics = async (journeyId) => {
+  const response = await api.get(`/journeys/${journeyId}/topics`);
+  return response.data;
+};
+
+/**
+ * Update topic
+ * @param {string} topicId
+ * @param {Object} updates
+ */
+export const updateTopic = async (topicId, updates) => {
+  const response = await api.put(`/topics/${topicId}`, updates);
+  return response.data;
+};
+
+/**
+ * Delete topic
+ * @param {string} topicId
+ */
+export const deleteTopic = async (topicId) => {
+  const response = await api.delete(`/topics/${topicId}`);
+  return response.data;
+};
+
+/**
  * Create a new task for a journey
  * @param {string} journeyId - Journey ID
  * @param {string} name - Task name
+ * @param {string} topicId - Topic ID (Required)
  * @returns {Promise} Created task
  */
-export const createTask = async (journeyId, name) => {
-  const response = await api.post(`/journeys/${journeyId}/tasks`, { name });
+export const createTask = async (journeyId, name, topicId) => {
+  const response = await api.post(`/journeys/${journeyId}/tasks`, { name, topicId });
   return response.data;
 };
 
@@ -121,10 +154,11 @@ export const createTask = async (journeyId, name) => {
  * Create multiple tasks for a journey
  * @param {string} journeyId - Journey ID
  * @param {Array<string>} tasks - Array of task names
+ * @param {string} topicId - Topic ID (Required)
  * @returns {Promise} Created tasks response
  */
-export const createBulkTasks = async (journeyId, tasks) => {
-  const response = await api.post(`/journeys/${journeyId}/tasks/bulk`, { tasks });
+export const createBulkTasks = async (journeyId, tasks, topicId) => {
+  const response = await api.post(`/journeys/${journeyId}/tasks/bulk`, { tasks, topicId });
   return response.data;
 };
 
@@ -173,5 +207,9 @@ export default {
   createBulkTasks,
   updateTask,
   deleteTask,
-  reactivateJourney
+  reactivateJourney,
+  createTopic,
+  getTopics,
+  updateTopic,
+  deleteTopic
 };

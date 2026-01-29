@@ -576,9 +576,6 @@ export const googleAuth = async (req, res) => {
     if (user) {
       // If user exists by email, link google account
       user.googleId = googleId;
-      if (!user.profilePicture && typeof picture === 'string' && picture.length > 0) {
-        user.profilePicture = picture;
-      }
       user.isVerified = true;
       user.otp = undefined;
       user.otpExpire = undefined;
@@ -621,7 +618,6 @@ export const googleAuth = async (req, res) => {
       email,
       googleId,
       authProvider: 'google',
-      profilePicture: typeof picture === 'string' && picture.length > 0 ? picture : undefined,
       isVerified: true
     });
 

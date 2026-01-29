@@ -37,11 +37,7 @@ export const authAPI = {
 
   // Upload profile picture
   uploadProfilePicture: async (formData) => {
-    const response = await api.put('/auth/profile-picture', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await api.put('/auth/profile-picture', formData);
     return response.data;
   },
 

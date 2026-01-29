@@ -40,7 +40,8 @@ const userSchema = new mongoose.Schema({
     default: 'local'
   },
   profilePicture: {
-    type: String
+    type: String,
+    default: ""
   },
   resetPasswordToken: String,
   resetPasswordExpire: Date,

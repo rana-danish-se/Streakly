@@ -7,6 +7,12 @@ const taskSchema = new mongoose.Schema({
     required: [true, 'Task must belong to a journey'],
     index: true
   },
+  topic: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Topic',
+    required: [true, 'Task must belong to a topic'],
+    index: true
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

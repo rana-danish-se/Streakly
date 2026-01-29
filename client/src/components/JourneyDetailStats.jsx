@@ -11,10 +11,17 @@ const JourneyDetailStats = ({ stats, tasks = [] }) => {
   
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(t => t.completed).length;
-  const progress = stats?.progress || 0;
+  const completedTopics = stats?.completedTopics || 0;
+  const totalTopics = stats?.totalTopics || 0;
+
+  // Calculating overall progress combining tasks and topics
+  const totalItems = totalTasks + totalTopics;
+  const completedItems = completedTasks + completedTopics;
+  const progress = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
+
   const totalDays = stats?.totalDays || 0;
   const currentStreak = stats?.currentStreak || 0;
-  const longestStreak = stats?.longestStreak || 0;
+  // const longestStreak = stats?.longestStreak || 0; // Removing unused
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -185,23 +192,47 @@ const JourneyDetailStats = ({ stats, tasks = [] }) => {
                 color: '#A855F7'
               }}
             >
-              <FiTrendingUp className="w-4 h-4" />
+              <FiCheckSquare className="w-4 h-4" />
             </div>
             <span 
               className="text-xs font-semibold uppercase tracking-wider opacity-60"
               style={{ color: 'var(--text)' }}
             >
-              Best Streak
+              Topics Completed
             </span>
           </div>
 
-          <div 
-            className="text-3xl font-bold"
-            style={{ color: 'var(--text)' }}
-          >
-            {longestStreak}{' '}
-            <span className="text-base font-normal opacity-50">days</span>
+          {/* Value */}
+          <div className="mb-3">
+            <div 
+              className="text-3xl font-bold flex items-baseline gap-2"
+              style={{ color: 'var(--text)' }}
+            >
+              {completedTopics}{' '}
+              <span className="text-base font-medium opacity-50">
+                / {totalTopics}
+              </span>
+            </div>
           </div>
+          
+           {/* Progress Bar */}
+           <div 
+            className="w-full h-1.5 rounded-full overflow-hidden"
+            style={{ 
+              backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+            }}
+          >
+            <motion.div 
+              className="h-full rounded-full"
+              style={{ 
+                backgroundColor: '#A855F7'
+              }}
+              initial={{ width: 0 }}
+              animate={{ width: `${totalTopics > 0 ? (completedTopics / totalTopics) * 100 : 0}%` }}
+              transition={{ duration: 1, ease: "easeOut" }}
+            />
+          </div>
+
         </div>
       </motion.div>
 

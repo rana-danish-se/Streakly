@@ -9,6 +9,7 @@ import journeyRoutes from './routes/journeyRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
 import pushSubscriptionRoutes from './routes/pushSubscription.js';
 import quoteRoutes from './routes/quoteRoutes.js';
+import topicRoutes from './routes/topicRoutes.js';
 
 import cronRoutes from './routes/cronRoutes.js';
 
@@ -68,6 +69,8 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/push', pushSubscriptionRoutes);
 app.use('/api/cron', cronRoutes);
 app.use('/api/quotes', quoteRoutes);
+app.use('/api/topics', topicRoutes);
+app.use('/api/journeys/:journeyId/topics', topicRoutes);
 
 app.get('/', (req, res) => {
   res.json({

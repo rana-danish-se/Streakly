@@ -24,7 +24,8 @@ const JourneyHeader = ({
   onComplete, 
   onReactivate, 
   onStart, 
-  stats 
+  stats,
+  loadingAction // 'start', 'reactivate', 'complete', 'delete'
 }) => {
   const navigate = useNavigate();
   const { theme } = useTheme();
@@ -270,49 +271,70 @@ const JourneyHeader = ({
             
             {journey.status === 'active' && progress === 100 && (
               <motion.button 
-                onClick={onComplete} 
-                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold"
+                onClick={() => onComplete()} 
+                className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold ${loadingAction === 'complete' ? 'opacity-80 cursor-wait' : ''}`}
                 style={{ 
                   backgroundColor: 'var(--success)',
                   color: '#FFFFFF'
                 }}
-                whileHover={{ scale: 1.05, boxShadow: '0 10px 30px rgba(34, 197, 94, 0.3)' }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={loadingAction ? {} : { scale: 1.05, boxShadow: '0 10px 30px rgba(34, 197, 94, 0.3)' }}
+                whileTap={loadingAction ? {} : { scale: 0.95 }}
+                disabled={!!loadingAction}
               >
-                <FiCheckCircle className="w-5 h-5" />
-                Complete Journey
+                {loadingAction === 'complete' ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <FiCheckCircle className="w-5 h-5" />
+                    Complete Journey
+                  </>
+                )}
               </motion.button>
             )}
 
             {journey.status === 'pending' && (
               <motion.button 
                 onClick={onStart} 
-                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold"
+                className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold ${loadingAction === 'start' ? 'opacity-80 cursor-wait' : ''}`}
                 style={{ 
                   backgroundColor: 'var(--success)',
                   color: '#FFFFFF'
                 }}
-                whileHover={{ scale: 1.05, boxShadow: '0 10px 30px rgba(34, 197, 94, 0.3)' }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={loadingAction ? {} : { scale: 1.05, boxShadow: '0 10px 30px rgba(34, 197, 94, 0.3)' }}
+                whileTap={loadingAction ? {} : { scale: 0.95 }}
+                disabled={!!loadingAction}
               >
-                <FiPlay className="w-5 h-5" />
-                Start Journey
+                {loadingAction === 'start' ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                     <FiPlay className="w-5 h-5" />
+                     Start Journey
+                  </>
+                )}
               </motion.button>
             )}
 
             {journey.status === 'completed' && (
               <motion.button 
                 onClick={onReactivate} 
-                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold"
+                className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold ${loadingAction === 'reactivate' ? 'opacity-80 cursor-wait' : ''}`}
                 style={{ 
                   backgroundColor: 'var(--primary)',
                   color: '#FFFFFF'
                 }}
-                whileHover={{ scale: 1.05, boxShadow: '0 10px 30px rgba(99, 102, 241, 0.3)' }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={loadingAction ? {} : { scale: 1.05, boxShadow: '0 10px 30px rgba(99, 102, 241, 0.3)' }}
+                whileTap={loadingAction ? {} : { scale: 0.95 }}
+                disabled={!!loadingAction}
               >
-                <HiFire className="w-5 h-5" />
-                Reactivate Journey
+                {loadingAction === 'reactivate' ? (
+                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <HiFire className="w-5 h-5" />
+                    Reactivate Journey
+                  </>
+                )}
               </motion.button>
             )}
 
@@ -339,23 +361,30 @@ const JourneyHeader = ({
 
               <motion.button 
                 onClick={onDelete}
-                className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium"
+                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium ${loadingAction === 'delete' ? 'opacity-80 cursor-wait' : ''}`}
                 style={{ 
                   backgroundColor: 'var(--card)',
                   color: 'var(--text)',
                   border: '1px solid',
                   borderColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
                 }}
-                whileHover={{ 
+                whileHover={loadingAction ? {} : { 
                   y: -2,
                   borderColor: 'var(--danger)',
                   backgroundColor: theme === 'dark' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.05)',
                   color: 'var(--danger)'
                 }}
-                whileTap={{ scale: 0.98 }}
+                whileTap={loadingAction ? {} : { scale: 0.98 }}
+                disabled={!!loadingAction}
               >
-                <FiTrash2 className="w-4 h-4" />
-                Delete
+                {loadingAction === 'delete' ? (
+                   <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <FiTrash2 className="w-4 h-4" />
+                    Delete
+                  </>
+                )}
               </motion.button>
             </div>
 

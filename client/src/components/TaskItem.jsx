@@ -9,6 +9,7 @@ const TaskItem = ({ task, journeyStatus, startDate, onUpdate, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(task.name);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleToggleComplete = async () => {
     if (journeyStatus === 'pending') {
@@ -24,12 +25,20 @@ const TaskItem = ({ task, journeyStatus, startDate, onUpdate, onDelete }) => {
     }
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (editName.trim() && editName !== task.name) {
-      onUpdate(task._id, { name: editName });
+      setIsLoading(true);
+      try {
+        await onUpdate(task._id, { name: editName });
+        setIsEditing(false); // Only close if successful? Assuming onUpdate throws if failed.
+        setIsMenuOpen(false);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+        setIsEditing(false);
+        setIsMenuOpen(false);
     }
-    setIsEditing(false);
-    setIsMenuOpen(false);
   };
 
   const handleKeyDown = (e) => {
@@ -44,7 +53,7 @@ const TaskItem = ({ task, journeyStatus, startDate, onUpdate, onDelete }) => {
   return (
     <motion.div
       className={`group flex items-center gap-3 p-3 rounded-lg border border-transparent hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors ${
-        task.completed ? 'opacity-50' : ''
+        (task.completed || isDeleting) ? 'opacity-50' : ''
       }`}
     >
       <button
@@ -56,29 +65,25 @@ const TaskItem = ({ task, journeyStatus, startDate, onUpdate, onDelete }) => {
             : 'bg-white border-slate-300 hover:border-slate-900'
         }`}
       >
-        <AnimatePresence mode="wait">
-          {isLoading ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.5 }}
-            >
-              <div className={`w-4 h-4 border-2 rounded-full animate-spin ${
-                task.completed 
-                  ? 'border-white/50 border-t-white' 
-                  : 'border-slate-200 border-t-slate-900'
-              }`} />
-            </motion.div>
-          ) : task.completed && (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0 }}
-            >
-              <FiCheck className="w-5 h-5 stroke-[3]" />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {isLoading ? (
+          <div className={`w-4 h-4 border-2 rounded-full animate-spin ${
+            task.completed 
+              ? 'border-white/50 border-t-white' 
+              : 'border-slate-300 border-t-slate-600'
+          }`} />
+        ) : (
+          <AnimatePresence>
+            {task.completed && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+              >
+                <FiCheck className="w-5 h-5 stroke-[3]" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
       </button>
 
       <div className="flex-1 min-w-0">
@@ -143,15 +148,23 @@ const TaskItem = ({ task, journeyStatus, startDate, onUpdate, onDelete }) => {
                 >
                   <FiEdit2 className="w-3 h-3" /> Edit
                 </button>
-                <button
-                  onClick={() => {
-                    onDelete(task._id);
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
-                >
-                  <FiTrash2 className="w-3 h-3" /> Delete
-                </button>
+                  <button
+                    onClick={async () => {
+                      if (!window.confirm("Delete this task?")) return;
+                      setIsDeleting(true);
+                      setIsMenuOpen(false);
+                      try {
+                        await onDelete(task._id);
+                      } catch {
+                        setIsDeleting(false); // Reset if failed, otherwise component unmounts
+                      }
+                    }}
+                    disabled={isDeleting}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                  >
+                    {isDeleting ? <div className="w-3 h-3 border-2 border-red-400 border-t-transparent rounded-full animate-spin" /> : <FiTrash2 className="w-3 h-3" />}
+                    {isDeleting ? 'Deleting...' : 'Delete'}
+                  </button>
               </motion.div>
             </>
           )}

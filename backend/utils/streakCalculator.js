@@ -12,13 +12,13 @@ const getToday = () => {
   return getDateString(new Date());
 };
 
-export const calculateCurrentStreak = (tasks) => {
-  if (!tasks || tasks.length === 0) return 0;
+export const calculateCurrentStreak = (items) => {
+  if (!items || items.length === 0) return 0;
 
-  const uniqueDates = [...new Set(tasks
-    .filter(task => task.completed)
-    .map(task => {
-      const dateSource = task.completedAt;
+  const uniqueDates = [...new Set(items
+    .filter(item => item.completed)
+    .map(item => {
+      const dateSource = item.completedAt;
       return dateSource ? getDateString(new Date(dateSource)) : null;
     })
     .filter(date => date !== null)
@@ -53,13 +53,13 @@ export const calculateCurrentStreak = (tasks) => {
   return streak;
 };
 
-export const calculateLongestStreak = (tasks) => {
-  if (!tasks || tasks.length === 0) return 0;
+export const calculateLongestStreak = (items) => {
+  if (!items || items.length === 0) return 0;
 
-  const uniqueDates = [...new Set(tasks
-    .filter(task => task.completed)
-    .map(task => {
-      const dateSource = task.completedAt;
+  const uniqueDates = [...new Set(items
+    .filter(item => item.completed)
+    .map(item => {
+      const dateSource = item.completedAt;
       return dateSource ? getDateString(new Date(dateSource)) : null;
     })
     .filter(date => date !== null)
@@ -88,13 +88,13 @@ export const calculateLongestStreak = (tasks) => {
   return Math.max(longestStreak, currentStreak);
 };
 
-export const calculateTotalDays = (tasks) => {
-  if (!tasks || tasks.length === 0) return 0;
+export const calculateTotalDays = (items) => {
+  if (!items || items.length === 0) return 0;
   
-  const uniqueDates = new Set(tasks
-    .filter(task => task.completed)
-    .map(task => {
-      const dateSource = task.completedAt;
+  const uniqueDates = new Set(items
+    .filter(item => item.completed)
+    .map(item => {
+      const dateSource = item.completedAt;
       return dateSource ? getDateString(new Date(dateSource)) : null;
     })
     .filter(date => date !== null)
@@ -102,22 +102,26 @@ export const calculateTotalDays = (tasks) => {
   return uniqueDates.size;
 };
 
-export const calculateProgress = (tasks) => {
-  if (!tasks || tasks.length === 0) return 0;
+export const calculateProgress = (tasks, topics = []) => {
+  const totalItems = tasks.length + topics.length;
+  if (totalItems === 0) return 0;
 
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter(task => task.completed).length;
+  const completedItems = tasks.filter(t => t.completed).length + topics.filter(t => t.completed).length;
 
-  return Math.round((completedTasks / totalTasks) * 100);
+  return Math.round((completedItems / totalItems) * 100);
 };
 
-export const updateJourneyStats = (tasks) => {
-  const currentStreak = calculateCurrentStreak(tasks);
-  const longestStreak = calculateLongestStreak(tasks);
-  const totalDays = calculateTotalDays(tasks);
-  const progress = calculateProgress(tasks);
-  const completedTopics = tasks.filter(task => task.completed).length;
-  const totalTopics = tasks.length;
+export const updateJourneyStats = (tasks, topics = []) => {
+  // Combine tasks and topics for streak calculations (Activity feed)
+  const allActivities = [...tasks, ...topics];
+
+  const currentStreak = calculateCurrentStreak(allActivities);
+  const longestStreak = calculateLongestStreak(allActivities);
+  const totalDays = calculateTotalDays(allActivities);
+  const progress = calculateProgress(tasks, topics);
+  
+  const completedTopics = topics.filter(t => t.completed).length;
+  const totalTopics = topics.length;
 
   return {
     currentStreak,

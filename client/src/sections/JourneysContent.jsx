@@ -62,7 +62,7 @@ const JourneysContent = () => {
   const filters = [
     { id: 'all', label: 'All Journeys', count: journeys.length },
     { id: 'active', label: 'Active', count: journeys.filter(j => j.status === 'active').length },
-    { id: 'completed', label: 'Completed', count: journeys.filter(j => j.status === 'completed' || j.progress === 100).length },
+    { id: 'completed', label: 'Completed', count: journeys.filter(j => j.status === 'completed').length },
     { id: 'pending', label: 'Pending', count: journeys.filter(j => j.status === 'pending').length }
   ];
 
@@ -77,7 +77,7 @@ const JourneysContent = () => {
     if (activeFilter === 'active') {
       matchesFilter = journey.status === 'active';
     } else if (activeFilter === 'completed') {
-      matchesFilter = journey.status === 'completed' || journey.progress === 100;
+      matchesFilter = journey.status === 'completed';
     } else if (activeFilter === 'pending') {
       matchesFilter = journey.status === 'pending';
     }

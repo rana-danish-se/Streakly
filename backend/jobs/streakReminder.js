@@ -1,5 +1,6 @@
 import Journey from '../models/Journey.js';
 import Task from '../models/Task.js';
+import Topic from '../models/Topic.js';
 import pushService from '../services/pushNotificationService.js';
 
 const runStreakReminder = async () => {
@@ -24,7 +25,16 @@ const runStreakReminder = async () => {
           }
         });
 
-        if (!completedTaskToday) {
+        const completedTopicToday = await Topic.findOne({
+          journey: journey._id,
+          completed: true,
+          completedAt: {
+            $gte: todayStart,
+            $lte: todayEnd
+          }
+        });
+
+        if (!completedTaskToday && !completedTopicToday) {
           try {
             const payload = {
               title: '🔥 Streak Risk!',

@@ -13,7 +13,7 @@ const JourneyStats = ({ refreshTrigger }) => {
   const { theme } = useTheme();
   const [stats, setStats] = useState({
     totalJourneys: 0,
-    activeJourneys: 0,
+    completedTopics: 0,
     completedTasks: 0,
     longestStreak: 0,
     averageProgress: 0
@@ -40,9 +40,9 @@ const JourneyStats = ({ refreshTrigger }) => {
 
   const statsConfig = [
     {
-      icon: <FiBook className="w-6 h-6" />,
-      label: 'Active Journeys',
-      value: loading ? '...' : stats.activeJourneys,
+      icon: <FiCheckCircle className="w-6 h-6" />,
+      label: 'Topics Mastered',
+      value: loading ? '...' : stats.completedTopics,
       color: 'var(--primary)',
       rawColor: theme === 'dark' ? '#818CF8' : '#6366F1',
       bgColor: theme === 'dark' ? 'rgba(129, 140, 248, 0.1)' : 'rgba(99, 102, 241, 0.1)',
@@ -90,7 +90,7 @@ const JourneyStats = ({ refreshTrigger }) => {
     }
   };
 
-  // Skeleton loader for each stat card
+
   const SkeletonCard = ({ stat }) => (
     <motion.div
       className="rounded-2xl p-6 relative overflow-hidden"
@@ -135,13 +135,6 @@ const JourneyStats = ({ refreshTrigger }) => {
     </motion.div>
   );
 
-  // Don't render if no stats available
-  const hasStats = stats.totalJourneys > 0 || stats.activeJourneys > 0 || stats.completedTasks > 0 || stats.longestStreak > 0;
-  
-  if (!loading && !hasStats) {
-    return null;
-  }
-
   return (
     <motion.div
       variants={itemVariants}
@@ -153,7 +146,7 @@ const JourneyStats = ({ refreshTrigger }) => {
         ) : (
           <motion.div
             key={index}
-            className="group rounded-2xl p-6 relative overflow-hidden"
+            className="group rounded-2xl p-6 mb-4 relative overflow-hidden"
             style={{ 
               backgroundColor: 'var(--card)',
               border: '1px solid',
