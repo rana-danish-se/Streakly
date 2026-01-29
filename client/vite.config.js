@@ -8,8 +8,11 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://streakly-main.vercel.app',
         changeOrigin: true,
+      },
+      headers: {
+        'Cross-Origin-Embedder-Policy': 'unsafe-none',
       }
     }
   },

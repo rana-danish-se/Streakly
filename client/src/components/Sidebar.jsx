@@ -320,7 +320,12 @@ const Sidebar = () => {
                       onClick={handleAvatarClick}
                     >
                       {currentUser.profilePicture ? (
-                        <img src={currentUser.profilePicture} alt={currentUser.name} className="w-full h-full rounded-full object-cover" />
+                        <img 
+                          src={currentUser.profilePicture} 
+                          alt={currentUser.name} 
+                          className="w-full h-full rounded-full object-cover" 
+                          crossOrigin="anonymous"
+                        />
                       ) : (
                         getInitials(currentUser.name)
                       )}
@@ -588,7 +593,12 @@ const Sidebar = () => {
                         onClick={handleAvatarClick}
                       >
                         {currentUser.profilePicture ? (
-                          <img src={currentUser.profilePicture} alt={currentUser.name} className="w-full h-full rounded-full object-cover" />
+                          <img 
+                            src={currentUser.profilePicture} 
+                            alt={currentUser.name} 
+                            className="w-full h-full rounded-full object-cover"
+                            crossOrigin="anonymous"
+                          />
                         ) : (
                           getInitials(currentUser.name)
                         )}
