@@ -99,6 +99,7 @@ const ResourceCard = ({ resource, viewMode, onDelete }) => {
             <img 
               src={resource.url} 
               alt={resource.name}
+              crossOrigin="anonymous"
               className="w-full h-full object-cover rounded-xl"
             />
           ) : (

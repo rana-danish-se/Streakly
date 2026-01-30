@@ -24,6 +24,7 @@ const TopicItem = ({
   const [showAddInput, setShowAddInput] = useState(false);
   const [showSubtopicInput, setShowSubtopicInput] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAddingSubtopic, setIsAddingSubtopic] = useState(false);
 
   // Filter direct children
   const subtopics = allTopics.filter(t => t.parent === topic._id).sort((a,b) => a.order - b.order);
@@ -39,12 +40,19 @@ const TopicItem = ({
   // Visual completion: rely strictly on backend status which handles complex logic (tasks + subtopics)
   const isCompleted = topic.completed;
 
-  const handleAddSubtopics = (text) => {
+  const handleAddSubtopics = async (text) => {
       const titles = text.split('\n').map(t => t.trim()).filter(t => t);
-      if (titles.length > 0) {
-          onAddSubtopic(topic._id, titles);
+      if (titles.length === 0) return;
+      
+      setIsAddingSubtopic(true);
+      try {
+          const success = await onAddSubtopic(topic._id, titles);
+          if (success) {
+              setShowSubtopicInput(false);
+          }
+      } finally {
+          setIsAddingSubtopic(false);
       }
-      setShowSubtopicInput(false);
   };
 
   const handleToggleComplete = async (e) => {
@@ -60,7 +68,10 @@ const TopicItem = ({
   return (
     <div className="mb-4">
       {/* Topic Header */}
-      <div className="flex items-center group mb-2">
+      <div className="flex items-center group mb-2 p-2 -mx-2 rounded-xl transition-all duration-300 
+                    hover:bg-slate-100/60 dark:hover:bg-slate-800/40 
+                    hover:backdrop-blur-md hover:shadow-md 
+                    border border-transparent hover:border-slate-200/60 dark:hover:border-slate-700/50">
         <button 
           onClick={() => setIsExpanded(!isExpanded)}
           className="mr-2 p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -152,30 +163,42 @@ const TopicItem = ({
             exit={{ opacity: 0, height: 0 }}
             className="ml-4 pl-4 border-l-2 border-slate-100 dark:border-slate-800"
           >
-            {/* Add Subtopic Input */}
+             {/* Add Subtopic Input */}
              {showSubtopicInput && (
-              <div className="mb-4 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800">
-                  <div className="flex justify-between items-center mb-2">
-                        <h4 className="text-xs uppercase font-bold text-slate-400">Add Subtopics</h4>
-                        <span className="text-[10px] text-slate-400">Ctrl+Enter to add</span>
+              <div className="mb-4 bg-white dark:bg-slate-900 shadow-sm p-4 rounded-xl border border-slate-200 dark:border-slate-800 transition-all duration-200">
+                  <div className="flex justify-between items-center mb-3">
+                        <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Add Subtopics</h4>
+                        <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-[10px] font-medium text-slate-500">
+                           <span className="text-[10px]">Ctrl</span> + <span className="text-[10px]">↵</span>
+                        </span>
                   </div>
                   <textarea 
-                    className="w-full bg-white dark:bg-slate-950 p-2 rounded border border-slate-200 dark:border-slate-800 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                    className="w-full bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-700 text-sm 
+                             text-slate-900 dark:text-slate-100 placeholder:text-slate-400
+                             focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition-all resize-none
+                             disabled:opacity-50 disabled:cursor-not-allowed"
                     rows={3}
-                    placeholder="Subtopic 1&#10;Subtopic 2"
+                    placeholder="Enter subtopic titles...&#10;One per line"
                     onKeyDown={(e) => {
                         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                             e.preventDefault();
-                            if (e.target.value.trim()){
+                            if (e.target.value.trim() && !isAddingSubtopic){
                                 handleAddSubtopics(e.target.value);
                             }
                         }
                     }}
                     autoFocus
+                    disabled={isAddingSubtopic}
                     id={`subtopic-input-${topic._id}`}
                   />
-                  <div className="flex justify-end gap-2 mt-2">
-                      <button onClick={() => setShowSubtopicInput(false)} className="px-3 py-1 text-xs text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 rounded">Cancel</button>
+                  <div className="flex justify-end gap-2 mt-3">
+                      <button 
+                        onClick={() => setShowSubtopicInput(false)} 
+                        disabled={isAddingSubtopic}
+                        className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        Cancel
+                      </button>
                       <button 
                         onClick={() => {
                             const input = document.getElementById(`subtopic-input-${topic._id}`);
@@ -183,9 +206,18 @@ const TopicItem = ({
                                 handleAddSubtopics(input.value);
                             }
                         }}
-                        className="px-3 py-1 text-xs bg-primary text-white rounded hover:opacity-90"
+                        disabled={isAddingSubtopic}
+                        className="px-4 py-1.5 text-xs font-medium bg-slate-900 dark:bg-indigo-600 text-white rounded-lg hover:bg-slate-800 dark:hover:bg-indigo-700 active:bg-slate-950 dark:active:bg-indigo-800 
+                                 transition-all disabled:opacity-70 disabled:cursor-wait min-w-[60px] flex justify-center items-center shadow-sm hover:shadow"
                       >
-                          Add
+                          {isAddingSubtopic ? (
+                             <div className="flex items-center gap-2">
+                                <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span>Adding...</span>
+                             </div>
+                          ) : (
+                             'Add'
+                          )}
                       </button>
                   </div>
               </div>

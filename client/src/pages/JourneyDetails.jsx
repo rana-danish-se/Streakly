@@ -142,6 +142,9 @@ const JourneyDetails = () => {
     
     if (titles.length === 0) return;
 
+    // Artificial delay to show loading state (UX)
+    await new Promise(resolve => setTimeout(resolve, 600));
+
     try {
       const responses = [];
       for (const title of titles) {
@@ -158,9 +161,12 @@ const JourneyDetails = () => {
              setStats(prev => ({ ...prev, ...lastSuccess.data.journeyStats }));
         }
         toast.success(`${newTopics.length} subtopic(s) added`);
+        return true;
       }
+      return false;
     } catch {
       toast.error("Failed to add subtopics");
+      return false;
     }
   };
 
