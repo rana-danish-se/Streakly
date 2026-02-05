@@ -1,5 +1,6 @@
 import journeyNotificationJobs from '../jobs/journeyNotification.js';
 import runStreakReminder from '../jobs/streakReminder.js';
+import runDailyTaskReminder from '../jobs/dailyTaskReminder.js';
 import deleteUnverifiedUsers from '../jobs/cleanupUsers.js';
 
 export const triggerDailyRun = async (req, res) => {
@@ -9,7 +10,8 @@ export const triggerDailyRun = async (req, res) => {
         const starts = await journeyNotificationJobs.checkJourneyStarts();
         const reminders24h = await journeyNotificationJobs.check24HourReminders();
         const reminders1h = await journeyNotificationJobs.check1HourReminders();
-        return { starts, reminders24h, reminders1h };
+        const dailyTaskReminders = await runDailyTaskReminder();
+        return { starts, reminders24h, reminders1h, dailyTaskReminders };
       })(),
       runStreakReminder(),
       deleteUnverifiedUsers()
@@ -44,6 +46,15 @@ export const triggerJourneyCheck = async (req, res) => {
 export const triggerStreakReminder = async (req, res) => {
   try {
     const result = await runStreakReminder();
+    res.status(200).json({ success: true, result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const triggerDailyTaskReminder = async (req, res) => {
+  try {
+    const result = await runDailyTaskReminder();
     res.status(200).json({ success: true, result });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import VerifyOTP from './pages/VerifyOTP';
 import Dashboard from './pages/Dashboard';
+import DailyTasks from './pages/DailyTasks';
 import Journeys from './pages/Journeys';
 import JourneyDetails from './pages/JourneyDetails';
 import JourneyResources from './pages/JourneyResources';
@@ -32,6 +33,7 @@ function AnimatedRoutes() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard/daily-tasks" element={<DailyTasks />} />
         <Route path="/dashboard/journeys" element={<Journeys />} />
         <Route path="/dashboard/journeys/:id" element={<JourneyDetails />} />
         <Route path="/dashboard/journey/:id" element={<JourneyDetails />} />

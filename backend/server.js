@@ -10,6 +10,7 @@ import taskRoutes from './routes/taskRoutes.js';
 import pushSubscriptionRoutes from './routes/pushSubscription.js';
 import quoteRoutes from './routes/quoteRoutes.js';
 import topicRoutes from './routes/topicRoutes.js';
+import dailyTaskRoutes from './routes/dailyTaskRoutes.js';
 
 import cronRoutes from './routes/cronRoutes.js';
 
@@ -70,6 +71,7 @@ app.use('/api/push', pushSubscriptionRoutes);
 app.use('/api/cron', cronRoutes);
 app.use('/api/quotes', quoteRoutes);
 app.use('/api/topics', topicRoutes);
+app.use('/api/daily-tasks', dailyTaskRoutes);
 app.use('/api/journeys/:journeyId/topics', topicRoutes);
 
 app.get('/', (req, res) => {
@@ -104,8 +106,15 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🌐 Client URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}`);
-});
+
+// For Vercel serverless deployment
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🌐 Client URL: ${process.env.CLIENT_URL || 'http://localhost:5173'}`);
+  });
+}
+
+// Export for Vercel
+export default app;

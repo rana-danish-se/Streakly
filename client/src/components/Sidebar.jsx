@@ -10,7 +10,8 @@ import {
   FiChevronDown,
   FiSun,
   FiMoon,
-  FiCamera
+  FiCamera,
+  FiCheckSquare
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { useTheme } from '../contexts/ThemeContext';
@@ -61,6 +62,13 @@ const Sidebar = () => {
       icon: <FiHome className="w-5 h-5" />,
       badge: null,
       path: '/dashboard'
+    },
+    { 
+      id: 'daily-tasks', 
+      label: 'Daily Habits', 
+      icon: <FiCheckSquare className="w-5 h-5" />,
+      badge: null,
+      path: '/dashboard/daily-tasks'
     },
     { 
       id: 'journeys', 
@@ -596,14 +604,13 @@ const Sidebar = () => {
                           <img 
                             src={currentUser.profilePicture} 
                             alt={currentUser.name} 
-                            className="w-full h-full rounded-full object-cover"
+                            className="w-full h-full rounded-full object-cover" 
                             crossOrigin="anonymous"
                           />
                         ) : (
                           getInitials(currentUser.name)
                         )}
-
-                        {/* Upload Overlay */}
+                        
                         <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                           {isUploading ? (
                             <motion.div
@@ -616,8 +623,15 @@ const Sidebar = () => {
                           )}
                         </div>
                       </div>
+                      
+                      <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        className="hidden" 
+                        accept="image/*"
+                        onChange={handleFileChange}
+                      />
 
-                      {/* User Info */}
                       <div className="flex-1 text-left overflow-hidden">
                         <div 
                           className="font-semibold truncate text-sm"
@@ -633,7 +647,6 @@ const Sidebar = () => {
                         </div>
                       </div>
 
-                      {/* Dropdown Icon */}
                       <motion.div
                         animate={{ rotate: isUserMenuOpen ? 180 : 0 }}
                         transition={{ duration: 0.2 }}
@@ -643,7 +656,6 @@ const Sidebar = () => {
                       </motion.div>
                     </motion.button>
 
-                    {/* User Dropdown Menu */}
                     <AnimatePresence>
                       {isUserMenuOpen && (
                         <motion.div

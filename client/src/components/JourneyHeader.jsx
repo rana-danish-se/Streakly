@@ -30,8 +30,17 @@ const JourneyHeader = ({
   const navigate = useNavigate();
   const { theme } = useTheme();
 
-  // Calculate days
-  const daysPassed = stats?.totalDays || 0;
+  // Calculate days elapsed from start date
+  const calculateDaysElapsed = () => {
+    if (!journey.startDate) return 0;
+    const startDate = new Date(journey.startDate);
+    const today = new Date();
+    const diffTime = Math.abs(today - startDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+  
+  const daysPassed = calculateDaysElapsed();
   const targetDays = journey.targetDays || 30;
   const daysLeft = Math.max(0, targetDays - daysPassed);
   const progress = stats?.progress || 0;

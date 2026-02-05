@@ -1,67 +1,133 @@
-# Frontend Deployment Guide
+# Streakly Frontend - Deployment Guide
 
 ## Prerequisites
 
-1. **Vercel Account**: Sign up at [vercel.com](https://vercel.com)
-2. **Backend Deployed**: Ensure your backend is deployed and accessible
-3. **Environment Variables**: Have the following ready:
-   - Backend API URL
-   - Google OAuth Client ID
+Before deploying, ensure you have:
+- A deployed backend API (see backend DEPLOYMENT.md)
+- Google OAuth credentials configured for your production domain
+- Vercel account (or another hosting platform)
 
-## Deployment Steps
+## Environment Variables
 
-### 1. Install Vercel CLI (Optional)
-```bash
-npm i -g vercel
-```
+The frontend uses environment variables prefixed with `VITE_`. Copy `.env.example` to `.env` for local development.
 
-### 2. Set Environment Variables
+### Required Environment Variables:
 
-In your Vercel project settings, add:
+1. **VITE_API_URL**
+   - **Local**: `http://localhost:5000/api`
+   - **Production**: `https://your-backend-url.vercel.app/api`
+   - This should point to your deployed backend API
 
-```
-VITE_API_URL=https://your-backend.vercel.app/api
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
-```
+2. **VITE_GOOGLE_CLIENT_ID**
+   - Your Google OAuth 2.0 Client ID
+   - Must be configured to allow your production domain in Google Cloud Console
 
-### 3. Deploy via Vercel Dashboard
-
-1. Go to [vercel.com/new](https://vercel.com/new)
-2. Import your GitHub repository
-3. Select the `client` folder as the root directory
-4. Framework Preset: **Vite**
-5. Build Command: `npm run build`
-6. Output Directory: `dist`
-7. Add environment variables
-8. Click **Deploy**
-
-### 4. Deploy via CLI (Alternative)
+## Local Development
 
 ```bash
-cd client
-vercel --prod
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
 ```
 
-## Post-Deployment
+The app will run on `http://localhost:5173`
 
-### Update Backend CORS
+## Building for Production
 
-Ensure your backend's `CLIENT_URL` environment variable includes your deployed frontend URL:
+```bash
+# Create production build
+npm run build
 
+# Preview production build locally
+npm run preview
 ```
-CLIENT_URL=https://your-frontend.vercel.app
-```
 
-### Test Checklist
+The build output will be in the `dist/` directory.
 
-- [ ] Application loads correctly
-- [ ] All routes work (SPA routing)
-- [ ] Login/Register works
-- [ ] Google OAuth works
-- [ ] Journeys load without 401 errors
-- [ ] Quote of the Day displays
-- [ ] Push notifications can be enabled
-- [ ] Service worker registers successfully
+## Deploying to Vercel
+
+### Option 1: Using Vercel CLI
+
+1. **Install Vercel CLI**
+   ```bash
+   npm install -g vercel
+   ```
+
+2. **Login to Vercel**
+   ```bash
+   vercel login
+   ```
+
+3. **Deploy**
+   ```bash
+   # For preview deployment
+   vercel
+
+   # For production deployment
+   vercel --prod
+   ```
+
+### Option 2: Using Vercel Dashboard (Recommended)
+
+1. Go to [Vercel Dashboard](https://vercel.com)
+2. Click "Add New Project"
+3. Import your GitHub repository
+4. Configure the project:
+   - **Framework Preset**: Vite
+   - **Root Directory**: `client`
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+
+5. **Add Environment Variables**:
+   - `VITE_API_URL` - Your deployed backend URL
+   - `VITE_GOOGLE_CLIENT_ID` - Your Google OAuth Client ID
+
+6. Click "Deploy"
+
+## Post-Deployment Configuration
+
+### 1. Update Google OAuth Settings
+
+In [Google Cloud Console](https://console.cloud.google.com):
+- Go to APIs & Services → Credentials
+- Select your OAuth 2.0 Client ID
+- Add your Vercel deployment URL to:
+  - **Authorized JavaScript origins**: `https://your-app.vercel.app`
+  - **Authorized redirect URIs**: `https://your-app.vercel.app`
+
+### 2. Update Backend CORS
+
+Ensure your backend's `CLIENT_URL` environment variable includes your frontend deployment URL.
+
+### 3. Service Worker & PWA
+
+The app includes a service worker for push notifications. After deployment:
+- Service worker will be available at `/service-worker.js`
+- PWA manifest is at `/manifest.json`
+- Users can install the app on supported devices
+
+## Environment-Specific Configuration
+
+The app automatically detects the environment:
+- **Development**: Uses local backend (`http://localhost:5000/api`)
+- **Production**: Uses `VITE_API_URL` from environment variables
+
+## Vercel Configuration
+
+The `vercel.json` file includes:
+- **Rewrites**: SPA routing support
+- **Headers**: Security headers and service worker configuration
+- **Caching**: Optimized for static assets
+
+## Build Optimization
+
+The Vite config includes:
+- **Code splitting**: React and UI libraries are split into separate chunks
+- **Tree shaking**: Unused code is removed
+- **Minification**: Production builds are minified
+- **Source maps**: Disabled in production for smaller bundle size
 
 ## Troubleshooting
 

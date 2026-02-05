@@ -16,6 +16,10 @@
     {
       "path": "/api/cron/daily-run",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/daily-task-reminder",
+      "schedule": "*/30 * * * *"
     }
   ]
 }
