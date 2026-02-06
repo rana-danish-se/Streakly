@@ -2,10 +2,11 @@ import journeyNotificationJobs from '../jobs/journeyNotification.js';
 import runStreakReminder from '../jobs/streakReminder.js';
 import runDailyTaskReminder from '../jobs/dailyTaskReminder.js';
 import deleteUnverifiedUsers from '../jobs/cleanupUsers.js';
+import cleanupTodayTasks from '../jobs/cleanupTodayTasks.js';
 
 export const triggerDailyRun = async (req, res) => {
   try {
-    const [journeyResults, streakResults, cleanupResults] = await Promise.allSettled([
+    const [journeyResults, streakResults, cleanupResults, todayTaskCleanupResults] = await Promise.allSettled([
       (async () => {
         const starts = await journeyNotificationJobs.checkJourneyStarts();
         const reminders24h = await journeyNotificationJobs.check24HourReminders();
@@ -14,7 +15,8 @@ export const triggerDailyRun = async (req, res) => {
         return { starts, reminders24h, reminders1h, dailyTaskReminders };
       })(),
       runStreakReminder(),
-      deleteUnverifiedUsers()
+      deleteUnverifiedUsers(),
+      cleanupTodayTasks()
     ]);
 
     res.status(200).json({
@@ -22,7 +24,8 @@ export const triggerDailyRun = async (req, res) => {
       results: {
         journeyChecks: journeyResults.status === 'fulfilled' ? journeyResults.value : journeyResults.reason,
         streakReminders: streakResults.status === 'fulfilled' ? streakResults.value : streakResults.reason,
-        userCleanup: cleanupResults.status === 'fulfilled' ? cleanupResults.value : cleanupResults.reason
+        userCleanup: cleanupResults.status === 'fulfilled' ? cleanupResults.value : cleanupResults.reason,
+        todayTaskCleanup: todayTaskCleanupResults.status === 'fulfilled' ? todayTaskCleanupResults.value : todayTaskCleanupResults.reason
       }
     });
   } catch (error) {
@@ -64,6 +67,15 @@ export const triggerDailyTaskReminder = async (req, res) => {
 export const triggerUserCleanup = async (req, res) => {
   try {
     const result = await deleteUnverifiedUsers();
+    res.status(200).json({ success: true, result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const triggerTodayTaskCleanup = async (req, res) => {
+  try {
+    const result = await cleanupTodayTasks();
     res.status(200).json({ success: true, result });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
