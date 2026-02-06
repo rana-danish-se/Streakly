@@ -14,6 +14,7 @@ import VerifyOTP from './pages/VerifyOTP';
 import Dashboard from './pages/Dashboard';
 import DailyTasks from './pages/DailyTasks';
 import TodayTasks from './pages/TodayTasks';
+import ScheduledTasks from './pages/ScheduledTasks';
 import Journeys from './pages/Journeys';
 import JourneyDetails from './pages/JourneyDetails';
 import JourneyResources from './pages/JourneyResources';
@@ -36,6 +37,7 @@ function AnimatedRoutes() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/daily-tasks" element={<DailyTasks />} />
         <Route path="/dashboard/today-tasks" element={<TodayTasks />} />
+        <Route path="/dashboard/scheduled-tasks" element={<ScheduledTasks />} />
         <Route path="/dashboard/journeys" element={<Journeys />} />
         <Route path="/dashboard/journeys/:id" element={<JourneyDetails />} />
         <Route path="/dashboard/journey/:id" element={<JourneyDetails />} />

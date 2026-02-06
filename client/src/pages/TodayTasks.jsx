@@ -18,6 +18,7 @@ const TodayTasks = () => {
   const [loadingTaskId, setLoadingTaskId] = useState(null);
   const [actionType, setActionType] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [priorityFilter, setPriorityFilter] = useState('all');
   
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -137,10 +138,23 @@ const TodayTasks = () => {
 
   if (!user) return null;
 
-  // Calculate stats
+  // Filter tasks by priority
+  const filteredTasks = priorityFilter === 'all' 
+    ? tasks 
+    : tasks.filter(t => t.priority === priorityFilter);
+
+  // Calculate stats (based on all tasks)
   const completedCount = tasks.filter(t => t.completed).length;
   const totalCount = tasks.length;
   const completionRate = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+  // Priority filter buttons config
+  const priorityFilters = [
+    { id: 'all', label: 'All', color: 'var(--primary)' },
+    { id: 'high', label: 'High', color: '#EF4444' },
+    { id: 'medium', label: 'Medium', color: '#F97316' },
+    { id: 'low', label: 'Low', color: '#3B82F6' }
+  ];
 
   return (
     <div className="min-h-screen p-4 relative overflow-hidden" style={{ backgroundColor: 'var(--bg)' }}>
@@ -222,6 +236,44 @@ const TodayTasks = () => {
               </motion.button>
             </div>
 
+            {/* Priority Filter Buttons */}
+            <div className="flex flex-wrap gap-2 justify-center">
+              {priorityFilters.map((filter) => {
+                const isActive = priorityFilter === filter.id;
+                return (
+                  <motion.button
+                    key={filter.id}
+                    onClick={() => setPriorityFilter(filter.id)}
+                    className="px-5 py-2.5 rounded-xl font-semibold text-sm transition-all"
+                    style={{
+                      backgroundColor: isActive ? filter.color : 'transparent',
+                      color: isActive ? '#FFFFFF' : 'var(--text)',
+                      border: `2px solid ${isActive ? filter.color : 'rgba(128, 128, 128, 0.2)'}`,
+                      opacity: isActive ? 1 : 0.7
+                    }}
+                    whileHover={{ 
+                      scale: 1.05,
+                      opacity: 1,
+                      borderColor: filter.color
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {filter.label}
+                    {filter.id !== 'all' && (
+                      <span className="ml-1.5 text-xs opacity-75">
+                        ({tasks.filter(t => t.priority === filter.id).length})
+                      </span>
+                    )}
+                    {filter.id === 'all' && (
+                      <span className="ml-1.5 text-xs opacity-75">
+                        ({tasks.length})
+                      </span>
+                    )}
+                  </motion.button>
+                );
+              })}
+            </div>
+
             {tasksLoading ? (
               <div className="flex justify-center p-12">
                 <div 
@@ -232,7 +284,7 @@ const TodayTasks = () => {
                   }}
                 ></div>
               </div>
-            ) : tasks.length === 0 ? (
+            ) : filteredTasks.length === 0 ? (
               <div 
                 className="text-center py-20 rounded-3xl border-2 border-dashed"
                 style={{ 
@@ -241,19 +293,25 @@ const TodayTasks = () => {
                   opacity: 0.8
                 }}
               >
-                <h3 className="text-xl font-medium mb-2" style={{ color: 'var(--text)' }}>No tasks for today</h3>
-                <p className="mb-6" style={{ color: 'var(--text)', opacity: 0.6 }}>Start your day with a clear plan!</p>
-                <button
-                  onClick={openAddModal}
-                  className="font-medium hover:underline"
-                  style={{ color: 'var(--primary)' }}
-                >
-                  Create your first task
-                </button>
+                <h3 className="text-xl font-medium mb-2" style={{ color: 'var(--text)' }}>
+                  {tasks.length === 0 ? 'No tasks for today' : `No ${priorityFilter} priority tasks`}
+                </h3>
+                <p className="mb-6" style={{ color: 'var(--text)', opacity: 0.6 }}>
+                  {tasks.length === 0 ? 'Start your day with a clear plan!' : 'Try a different filter or create a new task'}
+                </p>
+                {tasks.length === 0 && (
+                  <button
+                    onClick={openAddModal}
+                    className="font-medium hover:underline"
+                    style={{ color: 'var(--primary)' }}
+                  >
+                    Create your first task
+                  </button>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
-                {tasks.map((task) => (
+                {filteredTasks.map((task) => (
                   <TodayTaskCard
                     key={task._id}
                     task={task}

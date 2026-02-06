@@ -11,12 +11,17 @@ import {
   FiSun,
   FiMoon,
   FiCamera,
-  FiCheckSquare
+  FiCheckSquare,
+  FiCalendar,
+  FiClock
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { getJourneys } from '../services/journeyService';
+import scheduledTaskService from '../services/scheduledTaskService';
+import dailyTaskService from '../services/dailyTaskService';
+import todayTaskService from '../services/todayTaskService';
 import darkLogo from '../assets/darkLogo.png';
 import lightLogo from '../assets/lightLogo.png';
 
@@ -30,22 +35,39 @@ const Sidebar = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [journeyCount, setJourneyCount] = useState(0);
+  const [scheduledTaskCount, setScheduledTaskCount] = useState(0);
+  const [dailyTaskCount, setDailyTaskCount] = useState(0);
+  const [todayTaskCount, setTodayTaskCount] = useState(0);
 
   useEffect(() => {
-    const fetchJourneyCount = async () => {
+    const fetchCounts = async () => {
       try {
         if (user) {
-          const data = await getJourneys('active');
-          if (data.success) {
-            setJourneyCount(data.data.count || data.data.journeys?.length || 0);
+          // Fetch journey count
+          const journeyData = await getJourneys('active');
+          if (journeyData.success) {
+            setJourneyCount(journeyData.data.count || journeyData.data.journeys?.length || 0);
           }
+          
+          // Fetch scheduled tasks count
+          const scheduledTasks = await scheduledTaskService.getScheduledTasks();
+          setScheduledTaskCount(scheduledTasks.length || 0);
+          
+          // Fetch daily habits count
+          const dailyTasks = await dailyTaskService.getDailyTasks();
+          setDailyTaskCount(dailyTasks.length || 0);
+          
+          // Fetch today's tasks count (only incomplete)
+          const todayTasks = await todayTaskService.getTodayTasks();
+          const incompleteTodayTasks = todayTasks.filter(task => !task.completed);
+          setTodayTaskCount(incompleteTodayTasks.length || 0);
         }
       } catch (error) {
-        console.error('Failed to fetch journey count', error);
+        console.error('Failed to fetch counts', error);
       }
     };
 
-    fetchJourneyCount();
+    fetchCounts();
   }, [user]);
 
   // Default user if none provided
@@ -67,8 +89,22 @@ const Sidebar = () => {
       id: 'daily-tasks', 
       label: 'Daily Habits', 
       icon: <FiCheckSquare className="w-5 h-5" />,
-      badge: null,
+      badge: dailyTaskCount > 0 ? dailyTaskCount.toString() : null,
       path: '/dashboard/daily-tasks'
+    },
+    { 
+      id: 'today-tasks', 
+      label: "Today's Tasks", 
+      icon: <FiCalendar className="w-5 h-5" />,
+      badge: todayTaskCount > 0 ? todayTaskCount.toString() : null,
+      path: '/dashboard/today-tasks'
+    },
+    { 
+      id: 'scheduled-tasks', 
+      label: "Scheduled Tasks", 
+      icon: <FiClock className="w-5 h-5" />,
+      badge: scheduledTaskCount > 0 ? scheduledTaskCount.toString() : null,
+      path: '/dashboard/scheduled-tasks'
     },
     { 
       id: 'journeys', 

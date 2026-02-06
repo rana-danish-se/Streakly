@@ -12,6 +12,7 @@ import quoteRoutes from './routes/quoteRoutes.js';
 import topicRoutes from './routes/topicRoutes.js';
 import dailyTaskRoutes from './routes/dailyTaskRoutes.js';
 import todayTaskRoutes from './routes/todayTaskRoutes.js';
+import scheduledTaskRoutes from './routes/scheduledTaskRoutes.js';
 
 import cronRoutes from './routes/cronRoutes.js';
 
@@ -74,6 +75,7 @@ app.use('/api/quotes', quoteRoutes);
 app.use('/api/topics', topicRoutes);
 app.use('/api/daily-tasks', dailyTaskRoutes);
 app.use('/api/today-tasks', todayTaskRoutes);
+app.use('/api/scheduled-tasks', scheduledTaskRoutes);
 app.use('/api/journeys/:journeyId/topics', topicRoutes);
 
 app.get('/', (req, res) => {
