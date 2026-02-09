@@ -1,7 +1,7 @@
 import api from './api';
 
 const createDailyTask = async (taskData) => {
-    // taskData should include { title, time, timezone }
+    // taskData should include { title }
     const response = await api.post('/daily-tasks', taskData);
     return response.data;
 };

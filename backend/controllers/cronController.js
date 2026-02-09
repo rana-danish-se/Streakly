@@ -4,6 +4,7 @@ import runDailyTaskReminder from '../jobs/dailyTaskReminder.js';
 import deleteUnverifiedUsers from '../jobs/cleanupUsers.js';
 import cleanupTodayTasks from '../jobs/cleanupTodayTasks.js';
 import convertScheduledTasks from '../jobs/convertScheduledTasks.js';
+import runMissedTasksNotification from '../jobs/missedTasksNotification.js';
 
 export const triggerDailyRun = async (req, res) => {
   try {
@@ -12,8 +13,7 @@ export const triggerDailyRun = async (req, res) => {
         const starts = await journeyNotificationJobs.checkJourneyStarts();
         const reminders24h = await journeyNotificationJobs.check24HourReminders();
         const reminders1h = await journeyNotificationJobs.check1HourReminders();
-        const dailyTaskReminders = await runDailyTaskReminder();
-        return { starts, reminders24h, reminders1h, dailyTaskReminders };
+        return { starts, reminders24h, reminders1h };
       })(),
       runStreakReminder(),
       deleteUnverifiedUsers(),
@@ -88,6 +88,15 @@ export const triggerTodayTaskCleanup = async (req, res) => {
 export const triggerScheduledTaskConversion = async (req, res) => {
   try {
     const result = await convertScheduledTasks();
+    res.status(200).json({ success: true, result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const triggerMissedTasksNotification = async (req, res) => {
+  try {
+    const result = await runMissedTasksNotification();
     res.status(200).json({ success: true, result });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

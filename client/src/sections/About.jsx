@@ -15,7 +15,7 @@ import {
 import { HiSparkles, HiLightningBolt } from 'react-icons/hi';
 import { useTheme } from '../contexts/ThemeContext';
 
-const AboutSection = () => {
+const AboutSection = ({ onSignup }) => {
   const { theme } = useTheme();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
@@ -47,38 +47,38 @@ const AboutSection = () => {
   const features = [
     {
       icon: <FiTarget className="w-6 h-6" />,
-      title: "Goal-Oriented Learning",
-      description: "Set clear targets and track your progress with precision. Define your learning journeys and watch yourself grow.",
+      title: "Learning Journeys",
+      description: "Create customizable learning paths with topics, subtopics, and resources. Track your progress and stay organized throughout your journey.",
       color: "primary"
     },
     {
-      icon: <FiTrendingUp className="w-6 h-6" />,
-      title: "Progress Analytics",
-      description: "Visualize your learning curve with beautiful charts and detailed statistics. Know exactly where you stand.",
-      color: "success"
-    },
-    {
       icon: <FiAward className="w-6 h-6" />,
-      title: "Streak Management",
-      description: "Build consistency with our intelligent streak system. Track your highest and current streaks to stay motivated.",
+      title: "Daily Habits",
+      description: "Build lasting habits with streak tracking. Complete daily tasks to maintain your streak and build consistency over time.",
       color: "warning"
     },
     {
       icon: <FiCalendar className="w-6 h-6" />,
-      title: "Smart Scheduling",
-      description: "Plan your learning journey with target days and deadlines. Stay organized and never miss a milestone.",
-      color: "primary"
+      title: "Scheduled Tasks",
+      description: "Plan ahead with priority-based task scheduling. Organize tasks by low, medium, or high priority and never miss important deadlines.",
+      color: "success"
     },
     {
       icon: <FiCheckCircle className="w-6 h-6" />,
-      title: "Topic Tracking",
-      description: "Break down complex subjects into manageable topics. Check them off as you master each one.",
+      title: "Today's Tasks",
+      description: "Focus on what matters today. Create quick daily tasks and mark them complete as you go. Perfect for immediate priorities.",
+      color: "primary"
+    },
+    {
+      icon: <FiBook className="w-6 h-6" />,
+      title: "Learning Resources",
+      description: "Upload and organize resources for each journey. Add images, documents, and links to keep everything you need in one place.",
       color: "success"
     },
     {
       icon: <FiZap className="w-6 h-6" />,
-      title: "Consistency Monitoring",
-      description: "Track the days you show up and stay accountable. Our system keeps you honest and motivated.",
+      title: "Smart Notifications",
+      description: "Get notified about missed tasks at 10 PM UTC daily. Stay accountable without constant interruptions throughout your day.",
       color: "danger"
     }
   ];
@@ -408,6 +408,7 @@ const AboutSection = () => {
           className="text-center mt-16"
         >
           <motion.button
+            onClick={onSignup}
             className="group px-6 py-4 rounded-xl font-bold text-lg flex items-center gap-3 mx-auto"
             style={{ 
               backgroundColor: 'var(--primary)',

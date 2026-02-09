@@ -1,5 +1,5 @@
 import express from 'express';
-import { triggerJourneyCheck, triggerStreakReminder, triggerDailyRun, triggerUserCleanup, triggerDailyTaskReminder, triggerTodayTaskCleanup, triggerScheduledTaskConversion } from '../controllers/cronController.js';
+import { triggerJourneyCheck, triggerStreakReminder, triggerDailyRun, triggerUserCleanup, triggerDailyTaskReminder, triggerTodayTaskCleanup, triggerScheduledTaskConversion, triggerMissedTasksNotification } from '../controllers/cronController.js';
 
 const router = express.Router();
 
@@ -11,5 +11,6 @@ router.get('/daily-task-reminder', triggerDailyTaskReminder);
 router.get('/cleanup-users', triggerUserCleanup);
 router.get('/cleanup-today-tasks', triggerTodayTaskCleanup);
 router.get('/convert-scheduled-tasks', triggerScheduledTaskConversion);
+router.get('/missed-tasks-notification', triggerMissedTasksNotification);
 
 export default router;

@@ -7,7 +7,8 @@ import { updateJourney } from '../services/journeyService';
 const RenameJourneyModal = ({ isOpen, onClose, onSuccess, journey }) => {
   const [formData, setFormData] = useState({
     title: '',
-    description: ''
+    description: '',
+    targetDays: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -16,7 +17,8 @@ const RenameJourneyModal = ({ isOpen, onClose, onSuccess, journey }) => {
     if (journey) {
       setFormData({
         title: journey.title || '',
-        description: journey.description || ''
+        description: journey.description || '',
+        targetDays: journey.targetDays?.toString() || ''
       });
     }
   }, [journey, isOpen]);
@@ -36,6 +38,13 @@ const RenameJourneyModal = ({ isOpen, onClose, onSuccess, journey }) => {
     } else if (formData.title.length < 3) {
       newErrors.title = 'Title must be at least 3 characters';
     }
+    if (!formData.targetDays) {
+      newErrors.targetDays = 'Target days is required';
+    } else if (formData.targetDays < 1) {
+      newErrors.targetDays = 'Target days must be at least 1';
+    } else if (formData.targetDays > 365) {
+      newErrors.targetDays = 'Target days cannot exceed 365';
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -45,22 +54,27 @@ const RenameJourneyModal = ({ isOpen, onClose, onSuccess, journey }) => {
     if (!validate()) return;
     setIsLoading(true);
     try {
-      const response = await updateJourney(journey._id, formData);
+      const updateData = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        targetDays: parseInt(formData.targetDays)
+      };
+      const response = await updateJourney(journey._id, updateData);
       if (response.success) {
-        toast.success('Journey renamed successfully!');
+        toast.success('Journey updated successfully!');
         onSuccess(response.data);
         handleClose();
       }
     } catch (error) {
-      console.error('Error renaming journey:', error);
-      toast.error(error.response?.data?.message || 'Failed to rename journey');
+      console.error('Error updating journey:', error);
+      toast.error(error.response?.data?.message || 'Failed to update journey');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleClose = () => {
-    setFormData({ title: '', description: '' });
+    setFormData({ title: '', description: '', targetDays: '' });
     setErrors({});
     onClose();
   };
@@ -86,8 +100,8 @@ const RenameJourneyModal = ({ isOpen, onClose, onSuccess, journey }) => {
             >
               <div className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 px-8 py-6 flex items-center justify-between z-10">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-50">Rename Journey</h2>
-                  <p className="text-sm text-gray-600 dark:text-slate-400 mt-1">Update title and description</p>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-50">Edit Journey</h2>
+                  <p className="text-sm text-gray-600 dark:text-slate-400 mt-1">Update journey details</p>
                 </div>
                 <button
                   onClick={handleClose}
@@ -133,6 +147,51 @@ const RenameJourneyModal = ({ isOpen, onClose, onSuccess, journey }) => {
                     rows="3"
                     className="w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 focus:border-teal-500 rounded-xl focus:outline-none text-gray-900 dark:text-slate-50 transition-all resize-none"
                   />
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-slate-200 mb-2">
+                    <FiTarget className="w-4 h-4" />
+                    Target Days *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      name="targetDays"
+                      value={formData.targetDays}
+                      onChange={handleInputChange}
+                      placeholder="e.g., 30, 60, 90"
+                      min="1"
+                      max="365"
+                      className={`w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 ${
+                        errors.targetDays
+                          ? 'border-red-500 focus:border-red-500'
+                          : 'border-gray-200 dark:border-slate-700 focus:border-teal-500'
+                      } rounded-xl focus:outline-none text-gray-900 dark:text-slate-50 transition-all`}
+                    />
+                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-sm font-semibold text-gray-500 dark:text-slate-400">
+                      days
+                    </div>
+                  </div>
+                  {errors.targetDays && (
+                    <p className="text-sm text-red-600 dark:text-red-400 mt-1">{errors.targetDays}</p>
+                  )}
+                  <div className="flex gap-2 mt-3">
+                    {[30, 60, 90, 120].map((days) => (
+                      <button
+                        key={days}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, targetDays: days.toString() }))}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                          formData.targetDays === days.toString()
+                            ? 'bg-teal-600 text-white'
+                            : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        {days}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="flex gap-3 pt-2">

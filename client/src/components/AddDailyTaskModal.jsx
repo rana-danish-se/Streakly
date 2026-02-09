@@ -1,50 +1,31 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaTimes, FaClock } from 'react-icons/fa';
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
+import { FaTimes } from 'react-icons/fa';
 import '../index.css';
 
 const AddDailyTaskModal = ({ isOpen, onClose, onSave, taskToEdit = null }) => {
   const [title, setTitle] = useState('');
-  const [time, setTime] = useState(new Date());
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
         if (taskToEdit) {
             setTitle(taskToEdit.title);
-            // Parse time string "HH:mm" to Date object
-            if (taskToEdit.time) {
-                const [hours, minutes] = taskToEdit.time.split(':');
-                const date = new Date();
-                date.setHours(parseInt(hours, 10));
-                date.setMinutes(parseInt(minutes, 10));
-                setTime(date);
-            }
         } else {
             // Reset for new task
             setTitle('');
-            setTime(new Date());
         }
     }
   }, [isOpen, taskToEdit]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title || !time) return;
+    if (!title) return;
 
     setLoading(true);
     try {
-      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      
-      const hours = time.getHours().toString().padStart(2, '0');
-      const minutes = time.getMinutes().toString().padStart(2, '0');
-      const timeString = `${hours}:${minutes}`;
-      
-      await onSave({ title, time: timeString, timezone });
-      
+      await onSave({ title });
       onClose();
     } catch (error) {
       console.error('Failed to save task', error);
@@ -104,41 +85,6 @@ const AddDailyTaskModal = ({ isOpen, onClose, onSave, taskToEdit = null }) => {
                   }}
                   required
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text)' }}>
-                  Reminder Time
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                    <FaClock style={{ color: 'var(--text)', opacity: 0.4 }} />
-                  </div>
-                  <DatePicker
-                    selected={time}
-                    onChange={(date) => setTime(date)}
-                    showTimeSelect
-                    showTimeSelectOnly
-                    timeIntervals={15}
-                    timeCaption="Time"
-                    dateFormat="h:mm aa"
-                    wrapperClassName="w-full"
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all cursor-pointer"
-                    popperClassName="react-datepicker-popper"
-                    customInput={
-                      <input 
-                        style={{ 
-                            backgroundColor: 'var(--bg)', 
-                            color: 'var(--text)',
-                            borderColor: 'rgba(128, 128, 128, 0.2)',
-                        }}
-                      />
-                    }
-                  />
-                  <p className="mt-1 text-xs" style={{ color: 'var(--text)', opacity: 0.6 }}>
-                    We'll remind you at this time every day.
-                  </p>
-                </div>
               </div>
 
               <div className="pt-4 flex justify-end gap-3">

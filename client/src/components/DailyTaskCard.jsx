@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaCheck, FaClock, FaFire, FaTrash, FaSpinner } from 'react-icons/fa';
+import { FaCheck, FaFire, FaTrash, FaSpinner } from 'react-icons/fa';
 
 const DailyTaskCard = ({ task, onToggleComplete, onEdit, onDelete, isLoading = false, loadingAction = null }) => {
   const isCompleted = task.completedToday;
@@ -44,10 +44,30 @@ const DailyTaskCard = ({ task, onToggleComplete, onEdit, onDelete, isLoading = f
         }}
       />
 
-      {/* Top Section: Title Only */}
-      <div className="relative z-10 mb-4">
+      {/* Streak Indicator - Top Right */}
+      <div 
+        className="absolute top-4 right-4 z-20 flex items-center gap-2 px-3 py-2 rounded-xl"
+        style={{ 
+          backgroundColor: task.currentStreak > 0 
+            ? 'rgba(249, 115, 22, 0.15)' 
+            : 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(8px)',
+          color: task.currentStreak > 0 ? '#F97316' : 'var(--text)',
+          border: task.currentStreak > 0 
+            ? '1px solid rgba(249, 115, 22, 0.2)' 
+            : '1px solid rgba(255, 255, 255, 0.08)'
+        }}
+      >
+        <FaFire className={`text-sm ${task.currentStreak > 0 ? 'animate-pulse' : ''}`} />
+        <span className="text-sm font-bold">
+          {task.currentStreak}
+        </span>
+      </div>
+
+      {/* Title Section */}
+      <div className="relative z-10 mb-6 pr-16">
         <h3 
-          className={`text-xl font-bold mb-2 transition-all duration-300 ${
+          className={`text-xl font-bold transition-all duration-300 ${
             isCompleted ? 'line-through opacity-60' : ''
           }`}
           style={{ 
@@ -63,41 +83,6 @@ const DailyTaskCard = ({ task, onToggleComplete, onEdit, onDelete, isLoading = f
         >
           {task.title}
         </h3>
-      </div>
-
-      {/* Middle Section: Time & Streak */}
-      <div className="relative z-10 flex items-center gap-3 mb-6">
-        <div 
-          className="flex items-center gap-2 px-3 py-2 rounded-xl"
-          style={{ 
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(8px)',
-            color: 'var(--text)',
-            border: '1px solid rgba(255, 255, 255, 0.08)'
-          }}
-        >
-          <FaClock className="text-sm" style={{ opacity: 0.6 }} />
-          <span className="text-sm font-semibold">{task.time}</span>
-        </div>
-        
-        <div 
-          className="flex items-center gap-2 px-3 py-2 rounded-xl"
-          style={{ 
-            backgroundColor: task.currentStreak > 0 
-              ? 'rgba(249, 115, 22, 0.15)' 
-              : 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(8px)',
-            color: task.currentStreak > 0 ? '#F97316' : 'var(--text)',
-            border: task.currentStreak > 0 
-              ? '1px solid rgba(249, 115, 22, 0.2)' 
-              : '1px solid rgba(255, 255, 255, 0.08)'
-          }}
-        >
-          <FaFire className={`text-sm ${task.currentStreak > 0 ? 'animate-pulse' : ''}`} />
-          <span className="text-sm font-bold">
-            {task.currentStreak} {task.currentStreak === 1 ? 'day' : 'days'}
-          </span>
-        </div>
       </div>
 
       {/* Bottom Section: Action Buttons */}

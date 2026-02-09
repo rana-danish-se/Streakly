@@ -203,7 +203,7 @@ const HeroSection = ({ onLogin, onSignup, onDashboard }) => {
         >
           <HiSparkles className="w-4 h-4" style={{ color: 'var(--primary)' }} />
           <span className="text-sm font-semibold" style={{ color: 'var(--primary)' }}>
-            Track Your Learning Journey
+            Habits · Journeys · Progress
           </span>
         </motion.div>
 
@@ -227,7 +227,7 @@ const HeroSection = ({ onLogin, onSignup, onDashboard }) => {
               ease: "linear"
             }}
           >
-            Learning Path
+            Habits & Goals
             <motion.div
               className="absolute -bottom-2 left-0 right-0 h-1 rounded-full"
               style={{ backgroundColor: 'var(--primary)' }}
@@ -244,8 +244,8 @@ const HeroSection = ({ onLogin, onSignup, onDashboard }) => {
           className="text-lg md:text-xl mb-6 max-w-3xl opacity-80"
           style={{ color: 'var(--text)' }}
         >
-          Transform your learning experience with intelligent progress tracking, 
-          streak management, and detailed analytics. Stay motivated and achieve your goals.
+          Build lasting habits, track learning journeys, and organize your tasks.
+          With smart notifications and streak tracking, achieve your goals one day at a time.
         </motion.p>
 
         {/* CTA Buttons */}

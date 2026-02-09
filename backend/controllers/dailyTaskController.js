@@ -1,25 +1,19 @@
 
 import DailyTask from '../models/DailyTask.js';
 
-// Helper to get date string for a specific timezone
-const getDateInTimezone = (timezone) => {
-  return new Date().toLocaleDateString('en-CA', { timeZone: timezone }); // Returns YYYY-MM-DD
+// Helper to get date string in UTC
+const getDateInTimezone = () => {
+  return new Date().toISOString().split('T')[0]; // Returns YYYY-MM-DD in UTC
 };
 
 export const createDailyTask = async (req, res) => {
   try {
-    const { title, description, time, timezone } = req.body;
-    
-    if (!timezone) {
-      return res.status(400).json({ message: 'Timezone is required' });
-    }
+    const { title, description } = req.body;
 
     const newTask = new DailyTask({
       user: req.user._id,
       title,
-      description,
-      time,
-      timezone
+      description
     });
 
     await newTask.save();
@@ -34,13 +28,11 @@ export const getDailyTasks = async (req, res) => {
     const tasks = await DailyTask.find({ user: req.user._id, isActive: true }).lean();
     
     // Add "completedToday" flag for frontend convenience
-    const tasksWithStatus = tasks.map(task => {
-        const today = getDateInTimezone(task.timezone);
-        return {
-            ...task,
-            completedToday: task.completedDates.includes(today)
-        };
-    });
+    const today = getDateInTimezone();
+    const tasksWithStatus = tasks.map(task => ({
+        ...task,
+        completedToday: task.completedDates.includes(today)
+    }));
 
     res.json(tasksWithStatus);
   } catch (error) {
@@ -50,10 +42,10 @@ export const getDailyTasks = async (req, res) => {
 
 export const updateDailyTask = async (req, res) => {
   try {
-    const { title, description, time } = req.body;
+    const { title, description } = req.body;
     const task = await DailyTask.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
-      { title, description, time },
+      { title, description },
       { new: true }
     );
 
@@ -89,7 +81,7 @@ export const toggleTaskCompletion = async (req, res) => {
       return res.status(404).json({ message: 'Task not found' });
     }
 
-    const today = getDateInTimezone(task.timezone);
+    const today = getDateInTimezone();
     const isCompletedToday = task.completedDates.includes(today);
 
     if (isCompletedToday) {
@@ -109,7 +101,7 @@ export const toggleTaskCompletion = async (req, res) => {
       // Check if yesterday was completed to increment streak
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toLocaleDateString('en-CA', { timeZone: task.timezone });
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
       
       if (task.completedDates.includes(yesterdayStr)) {
         task.currentStreak += 1;

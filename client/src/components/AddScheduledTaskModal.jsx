@@ -199,12 +199,17 @@ const AddScheduledTaskModal = ({ isOpen, onClose, onSave, taskToEdit = null }) =
                   onChange={(date) => setScheduledDate(date)}
                   minDate={minDate}
                   dateFormat="MMMM d, yyyy"
-                  className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all"
-                  style={{ 
-                    backgroundColor: 'var(--bg)', 
-                    color: 'var(--text)',
-                    borderColor: 'rgba(128, 128, 128, 0.2)',
-                  }}
+                  wrapperClassName="w-full"
+                  className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 transition-all cursor-pointer"
+                  customInput={
+                    <input 
+                      style={{ 
+                        backgroundColor: 'var(--bg)', 
+                        color: 'var(--text)',
+                        borderColor: 'rgba(128, 128, 128, 0.2)',
+                      }}
+                    />
+                  }
                   required
                   placeholderText="Select a date"
                 />

@@ -39,10 +39,38 @@ const JourneyHeader = ({
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
+
+  // Calculate completion days (for completed journeys)
+  const calculateCompletionDays = () => {
+    if (!journey.startDate || !journey.completedAt) return 0;
+    const startDate = new Date(journey.startDate);
+    const completedDate = new Date(journey.completedAt);
+    const diffTime = Math.abs(completedDate - startDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
   
   const daysPassed = calculateDaysElapsed();
   const targetDays = journey.targetDays || 30;
-  const daysLeft = Math.max(0, targetDays - daysPassed);
+  
+  // Calculate days left based on journey status
+  let daysLeft = 0;
+  let daysLeftLabel = 'Days Left';
+  
+  if (journey.status === 'pending') {
+    // For pending journeys, show target days as remaining
+    daysLeft = targetDays;
+    daysLeftLabel = 'Days Left';
+  } else if (journey.status === 'completed') {
+    // For completed journeys, show how many days it took
+    daysLeft = calculateCompletionDays();
+    daysLeftLabel = 'Completed In';
+  } else {
+    // For active journeys, calculate actual days remaining
+    daysLeft = Math.max(0, targetDays - daysPassed);
+    daysLeftLabel = 'Days Left';
+  }
+  
   const progress = stats?.progress || 0;
 
   // Get status color and badge
@@ -268,7 +296,7 @@ const JourneyHeader = ({
                   className="text-xs opacity-60"
                   style={{ color: 'var(--text)' }}
                 >
-                  Days Left
+                  {daysLeftLabel}
                 </div>
               </motion.div>
 

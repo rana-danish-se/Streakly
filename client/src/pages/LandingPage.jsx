@@ -25,7 +25,7 @@ const LandingPage = () => {
          onSignup={handleSignup}
          onDashboard={handleDashboard}
        />
-       <AboutSection />   
+       <AboutSection onSignup={handleSignup} />
      <AboutDeveloper/>
     </main>
   );
