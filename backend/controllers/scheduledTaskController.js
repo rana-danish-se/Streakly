@@ -1,4 +1,5 @@
 import ScheduledTask from '../models/ScheduledTask.js';
+import moment from 'moment-timezone';
 
 // @desc    Create a new scheduled task
 // @route   POST /api/scheduled-tasks
@@ -24,7 +25,7 @@ export const createScheduledTask = async (req, res) => {
     }
 
     // Validate date is in the future (or today)
-    const today = new Date().toISOString().split('T')[0];
+    const today = moment().tz('Asia/Karachi').format('YYYY-MM-DD');
     if (scheduledDate < today) {
       return res.status(400).json({
         success: false,
@@ -133,7 +134,7 @@ export const updateScheduledTask = async (req, res) => {
         });
       }
 
-      const today = new Date().toISOString().split('T')[0];
+      const today = moment().tz('Asia/Karachi').format('YYYY-MM-DD');
       if (scheduledDate < today) {
         return res.status(400).json({
           success: false,

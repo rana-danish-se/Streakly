@@ -13,7 +13,7 @@ import topicRoutes from './routes/topicRoutes.js';
 import dailyTaskRoutes from './routes/dailyTaskRoutes.js';
 import todayTaskRoutes from './routes/todayTaskRoutes.js';
 import scheduledTaskRoutes from './routes/scheduledTaskRoutes.js';
-
+import archivedTaskRoutes from './routes/archivedTaskRoutes.js';
 import cronRoutes from './routes/cronRoutes.js';
 
 dotenv.config();
@@ -76,6 +76,7 @@ app.use('/api/topics', topicRoutes);
 app.use('/api/daily-tasks', dailyTaskRoutes);
 app.use('/api/today-tasks', todayTaskRoutes);
 app.use('/api/scheduled-tasks', scheduledTaskRoutes);
+app.use('/api/archived-tasks', archivedTaskRoutes);
 app.use('/api/journeys/:journeyId/topics', topicRoutes);
 
 app.get('/', (req, res) => {

@@ -13,7 +13,8 @@ import {
   FiCamera,
   FiCheckSquare,
   FiCalendar,
-  FiClock
+  FiClock,
+  FiArchive
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { useTheme } from '../contexts/ThemeContext';
@@ -22,6 +23,7 @@ import { getJourneys } from '../services/journeyService';
 import scheduledTaskService from '../services/scheduledTaskService';
 import dailyTaskService from '../services/dailyTaskService';
 import todayTaskService from '../services/todayTaskService';
+import archivedTaskService from '../services/archivedTaskService';
 import darkLogo from '../assets/darkLogo.png';
 import lightLogo from '../assets/lightLogo.png';
 
@@ -38,6 +40,7 @@ const Sidebar = () => {
   const [scheduledTaskCount, setScheduledTaskCount] = useState(0);
   const [dailyTaskCount, setDailyTaskCount] = useState(0);
   const [todayTaskCount, setTodayTaskCount] = useState(0);
+  const [archivedTaskCount, setArchivedTaskCount] = useState(0);
 
   useEffect(() => {
     const fetchCounts = async () => {
@@ -61,6 +64,10 @@ const Sidebar = () => {
           const todayTasks = await todayTaskService.getTodayTasks();
           const incompleteTodayTasks = todayTasks.filter(task => !task.completed);
           setTodayTaskCount(incompleteTodayTasks.length || 0);
+
+          // Fetch archived tasks count
+          const archivedTasks = await archivedTaskService.getArchivedTasks();
+          setArchivedTaskCount(archivedTasks.length || 0);
         }
       } catch (error) {
         console.error('Failed to fetch counts', error);
@@ -107,8 +114,15 @@ const Sidebar = () => {
       path: '/dashboard/scheduled-tasks'
     },
     { 
+      id: 'archived-tasks', 
+      label: "Archived Tasks", 
+      icon: <FiArchive className="w-5 h-5" />,
+      badge: archivedTaskCount > 0 ? archivedTaskCount.toString() : null,
+      path: '/dashboard/archived-tasks'
+    },
+    { 
       id: 'journeys', 
-      label: 'My Journeys', 
+      label: 'My Journeys',  
       icon: <FiBook className="w-5 h-5" />,
       badge: journeyCount > 0 ? journeyCount.toString() : null,
       path: '/dashboard/journeys'

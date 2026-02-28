@@ -1,6 +1,7 @@
 import DailyTask from '../models/DailyTask.js';
 import TodayTask from '../models/TodayTask.js';
 import pushService from '../services/pushNotificationService.js';
+import moment from 'moment-timezone';
 
 /**
  * Sends individual notifications for each missed task at 10 PM
@@ -8,7 +9,7 @@ import pushService from '../services/pushNotificationService.js';
  */
 const runMissedTasksNotification = async () => {
   try {
-    const today = new Date().toISOString().split('T')[0];
+    const today = moment().tz('Asia/Karachi').format('YYYY-MM-DD');
     let notificationsSent = 0;
     const errors = [];
 

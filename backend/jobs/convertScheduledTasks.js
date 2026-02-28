@@ -2,6 +2,7 @@ import ScheduledTask from '../models/ScheduledTask.js';
 import TodayTask from '../models/TodayTask.js';
 import User from '../models/User.js';
 import pushNotificationService from '../services/pushNotificationService.js';
+import moment from 'moment-timezone';
 
 /**
  * Convert scheduled tasks to today's tasks
@@ -9,7 +10,7 @@ import pushNotificationService from '../services/pushNotificationService.js';
  */
 const convertScheduledTasks = async () => {
   try {
-    const today = new Date().toISOString().split('T')[0];
+    const today = moment().tz('Asia/Karachi').format('YYYY-MM-DD');
     console.log(`[Cron] Converting scheduled tasks for ${today}...`);
 
     // Find all non-converted tasks scheduled for today
@@ -69,7 +70,7 @@ const convertScheduledTasks = async () => {
 
         // Mark scheduled task as converted
         scheduledTask.converted = true;
-        scheduledTask.convertedAt = new Date();
+        scheduledTask.convertedAt = moment().tz('Asia/Karachi').toDate();
         await scheduledTask.save();
 
         convertedCount++;

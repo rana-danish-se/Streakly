@@ -1,9 +1,9 @@
 import TodayTask from '../models/TodayTask.js';
+import moment from 'moment-timezone';
 
-// Helper to get date string in YYYY-MM-DD format
+// Helper to get date string in YYYY-MM-DD format based on Pakistan timezone
 const getDateString = () => {
-  const now = new Date();
-  return now.toISOString().split('T')[0];
+  return moment().tz('Asia/Karachi').format('YYYY-MM-DD');
 };
 
 export const createTodayTask = async (req, res) => {
@@ -86,7 +86,7 @@ export const toggleTodayTaskCompletion = async (req, res) => {
     }
 
     task.completed = !task.completed;
-    task.completedAt = task.completed ? new Date() : null;
+    task.completedAt = task.completed ? moment().tz('Asia/Karachi').toDate() : null;
 
     await task.save();
     res.json(task);

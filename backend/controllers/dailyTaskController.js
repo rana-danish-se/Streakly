@@ -1,9 +1,9 @@
-
 import DailyTask from '../models/DailyTask.js';
+import moment from 'moment-timezone';
 
-// Helper to get date string in UTC
+// Helper to get date string in PKT
 const getDateInTimezone = () => {
-  return new Date().toISOString().split('T')[0]; // Returns YYYY-MM-DD in UTC
+  return moment().tz('Asia/Karachi').format('YYYY-MM-DD');
 };
 
 export const createDailyTask = async (req, res) => {
@@ -99,9 +99,7 @@ export const toggleTaskCompletion = async (req, res) => {
       task.completedDates.push(today);
       
       // Check if yesterday was completed to increment streak
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      const yesterdayStr = moment().tz('Asia/Karachi').subtract(1, 'days').format('YYYY-MM-DD');
       
       if (task.completedDates.includes(yesterdayStr)) {
         task.currentStreak += 1;

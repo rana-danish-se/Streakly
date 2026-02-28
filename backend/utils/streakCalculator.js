@@ -1,15 +1,15 @@
-const getDateString = (date) => {
-  return date.toISOString().split('T')[0];
+import moment from 'moment-timezone';
+
+const getDateString = (date = new Date()) => {
+  return moment(date).tz('Asia/Karachi').format('YYYY-MM-DD');
 };
 
 const getYesterday = () => {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  return getDateString(yesterday);
+  return moment().tz('Asia/Karachi').subtract(1, 'days').format('YYYY-MM-DD');
 };
 
 const getToday = () => {
-  return getDateString(new Date());
+  return moment().tz('Asia/Karachi').format('YYYY-MM-DD');
 };
 
 export const calculateCurrentStreak = (items) => {
