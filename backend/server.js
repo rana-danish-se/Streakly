@@ -27,10 +27,11 @@ const allowedOrigins = [
   'https://streakly-fawn.vercel.app'
 ].filter(Boolean);
 
-app.use(cors({
+const corsOptions = {
   origin: function (origin, callback) {
+    // Allow requests with no origin (server-to-server, curl, mobile apps)
     if (!origin) return callback(null, true);
-    
+
     const isAllowed = allowedOrigins.some(allowedOrigin => {
       return allowedOrigin === origin || allowedOrigin.replace(/\/$/, '') === origin;
     });
@@ -38,25 +39,31 @@ app.use(cors({
     if (isAllowed) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      const err = new Error(`CORS policy: origin '${origin}' is not allowed.`);
+      err.status = 403;
+      callback(err);
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: [
-    'Content-Type', 
-    'Authorization', 
-    'X-Requested-With', 
-    'Accept', 
-    'Accept-Version', 
-    'Content-Length', 
-    'Content-MD5', 
-    'Date', 
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Accept',
+    'Accept-Version',
+    'Content-Length',
+    'Content-MD5',
+    'Date',
     'X-Api-Version'
   ],
-  maxAge: 86400, 
+  maxAge: 86400,
   optionsSuccessStatus: 204
-}));
+};
+
+// Handle preflight requests explicitly before other middleware
+app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
